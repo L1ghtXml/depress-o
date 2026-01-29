@@ -6,6 +6,7 @@ local TweenService = game:GetService("TweenService")
 local UserInputService = game:GetService("UserInputService")
 local RunService = game:GetService("RunService")
 local CoreGui = game:GetService("CoreGui")
+local HttpService = game:GetService("HttpService")
 
 local Player = Players.LocalPlayer
 local Mouse = Player:GetMouse()
@@ -20,7 +21,8 @@ local Colors = {
     Toggle = Color3.fromRGB(255, 255, 255),
     Slider = Color3.fromRGB(255, 255, 255),
     Button = Color3.fromRGB(0, 0, 0),
-    ButtonHover = Color3.fromRGB(20, 20, 20)
+    ButtonHover = Color3.fromRGB(20, 20, 20),
+    InputBg = Color3.fromRGB(10, 10, 10)
 }
 
 local function Tween(instance, properties, duration)
@@ -54,6 +56,17 @@ local LucideIcons = {
     ["heart"] = "rbxassetid://10734896829",
     ["flag"] = "rbxassetid://10723434711",
     ["pointer"] = "rbxassetid://10734896682",
+    ["file"] = "rbxassetid://10723369639",
+    ["folder"] = "rbxassetid://10723369639",
+    ["save"] = "rbxassetid://10734952273",
+    ["trash"] = "rbxassetid://10734896920",
+    ["edit"] = "rbxassetid://10734943156",
+    ["copy"] = "rbxassetid://10734896206",
+    ["clipboard"] = "rbxassetid://10734896206",
+    ["link"] = "rbxassetid://10734929777",
+    ["image"] = "rbxassetid://10723417387",
+    ["download"] = "rbxassetid://10734898592",
+    ["upload"] = "rbxassetid://10734896920",
 }
 
 local function CreateIcon(parent, iconName, size)
@@ -559,6 +572,7 @@ function Spectrum:CreateSlider(tab, config)
 end
 
 function Spectrum:CreateDropdown(tab, config)
+    local Multi = config.Multi or false
     local DropdownFrame = CreateFrame(tab.Content, config.Name or "Dropdown", UDim2.new(1, -10, 0, 40))
     DropdownFrame.BackgroundColor3 = Colors.Button
     DropdownFrame.ClipsDescendants = true
@@ -597,7 +611,33 @@ function Spectrum:CreateDropdown(tab, config)
     OptionsList.Parent = OptionsFrame
     
     local Open = false
-    local Selected = config.Default or (config.Options and config.Options[1]) or "None"
+    local Selected = {}
+    
+    if Multi then
+        if config.Default then
+            for _, v in pairs(config.Default) do
+                Selected[v] = true
+            end
+        end
+    else
+        Selected = config.Default or (config.Options and config.Options[1]) or "None"
+    end
+    
+    local function UpdateLabel()
+        if Multi then
+            local selectedItems = {}
+            for item, _ in pairs(Selected) do
+                table.insert(selectedItems, item)
+            end
+            if #selectedItems > 0 then
+                DropdownLabel.Text = (config.Text or "Dropdown") .. ": " .. table.concat(selectedItems, ", ")
+            else
+                DropdownLabel.Text = config.Text or "Dropdown"
+            end
+        else
+            DropdownLabel.Text = (config.Text or "Dropdown") .. ": " .. Selected
+        end
+    end
     
     for _, option in ipairs(config.Options or {}) do
         local OptionButton = Instance.new("TextButton")
@@ -605,10 +645,7 @@ function Spectrum:CreateDropdown(tab, config)
         OptionButton.Size = UDim2.new(1, 0, 0, 35)
         OptionButton.BackgroundColor3 = Colors.Secondary
         OptionButton.BorderSizePixel = 0
-        OptionButton.Text = option
-        OptionButton.TextColor3 = Colors.Text
-        OptionButton.TextSize = 13
-        OptionButton.Font = Enum.Font.Gotham
+        OptionButton.Text = ""
         OptionButton.Parent = OptionsFrame
         
         local OptionBorder = Instance.new("UIStroke")
@@ -617,18 +654,69 @@ function Spectrum:CreateDropdown(tab, config)
         OptionBorder.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
         OptionBorder.Parent = OptionButton
         
-        OptionButton.MouseButton1Click:Connect(function()
-            Selected = option
-            DropdownLabel.Text = (config.Text or "Dropdown") .. ": " .. Selected
-            Open = false
+        local OptionLabel = Instance.new("TextLabel")
+        OptionLabel.Position = UDim2.new(0, 10, 0, 0)
+        OptionLabel.Size = UDim2.new(1, Multi and -40 or -10, 1, 0)
+        OptionLabel.BackgroundTransparency = 1
+        OptionLabel.Text = option
+        OptionLabel.TextColor3 = Colors.Text
+        OptionLabel.TextSize = 13
+        OptionLabel.Font = Enum.Font.Gotham
+        OptionLabel.TextXAlignment = Enum.TextXAlignment.Left
+        OptionLabel.Parent = OptionButton
+        
+        if Multi then
+            local Checkbox = Instance.new("Frame")
+            Checkbox.Name = "Checkbox"
+            Checkbox.Position = UDim2.new(1, -30, 0.5, -8)
+            Checkbox.Size = UDim2.new(0, 16, 0, 16)
+            Checkbox.BackgroundColor3 = Colors.Secondary
+            Checkbox.BorderSizePixel = 0
+            Checkbox.Parent = OptionButton
             
-            Tween(DropdownFrame, {Size = UDim2.new(1, -10, 0, 40)})
-            Tween(Arrow, {Rotation = 0})
+            local CheckboxBorder = Instance.new("UIStroke")
+            CheckboxBorder.Color = Colors.Border
+            CheckboxBorder.Thickness = 1
+            CheckboxBorder.Parent = Checkbox
             
-            if config.Callback then
-                config.Callback(Selected)
-            end
-        end)
+            local Checkmark = Instance.new("TextLabel")
+            Checkmark.Size = UDim2.new(1, 0, 1, 0)
+            Checkmark.BackgroundTransparency = 1
+            Checkmark.Text = "✓"
+            Checkmark.TextColor3 = Colors.Text
+            Checkmark.TextSize = 14
+            Checkmark.Font = Enum.Font.GothamBold
+            Checkmark.Visible = Selected[option] or false
+            Checkmark.Parent = Checkbox
+            
+            OptionButton.MouseButton1Click:Connect(function()
+                Selected[option] = not Selected[option]
+                Checkmark.Visible = Selected[option]
+                
+                UpdateLabel()
+                
+                if config.Callback then
+                    local selectedList = {}
+                    for item, _ in pairs(Selected) do
+                        table.insert(selectedList, item)
+                    end
+                    config.Callback(selectedList)
+                end
+            end)
+        else
+            OptionButton.MouseButton1Click:Connect(function()
+                Selected = option
+                UpdateLabel()
+                Open = false
+                
+                Tween(DropdownFrame, {Size = UDim2.new(1, -10, 0, 40)})
+                Tween(Arrow, {Rotation = 0})
+                
+                if config.Callback then
+                    config.Callback(Selected)
+                end
+            end)
+        end
         
         OptionButton.MouseEnter:Connect(function()
             Tween(OptionButton, {BackgroundColor3 = Colors.ButtonHover})
@@ -659,12 +747,185 @@ function Spectrum:CreateDropdown(tab, config)
         end
     end)
     
-    DropdownLabel.Text = (config.Text or "Dropdown") .. ": " .. Selected
+    UpdateLabel()
     
     return {
         SetValue = function(value)
-            Selected = value
-            DropdownLabel.Text = (config.Text or "Dropdown") .. ": " .. Selected
+            if Multi then
+                Selected = {}
+                for _, v in pairs(value) do
+                    Selected[v] = true
+                end
+            else
+                Selected = value
+            end
+            UpdateLabel()
+        end
+    }
+end
+
+function Spectrum:CreateTextbox(tab, config)
+    local TextboxFrame = CreateFrame(tab.Content, config.Name or "Textbox", UDim2.new(1, -10, 0, 40))
+    TextboxFrame.BackgroundColor3 = Colors.Button
+    
+    local TextboxLabel = Instance.new("TextLabel")
+    TextboxLabel.Position = UDim2.new(0, 10, 0, 0)
+    TextboxLabel.Size = UDim2.new(0.4, -10, 1, 0)
+    TextboxLabel.BackgroundTransparency = 1
+    TextboxLabel.Text = config.Text or "Textbox"
+    TextboxLabel.TextColor3 = Colors.Text
+    TextboxLabel.TextSize = 14
+    TextboxLabel.Font = Enum.Font.Gotham
+    TextboxLabel.TextXAlignment = Enum.TextXAlignment.Left
+    TextboxLabel.Parent = TextboxFrame
+    
+    local Textbox = Instance.new("TextBox")
+    Textbox.Name = "Textbox"
+    Textbox.Position = UDim2.new(0.4, 5, 0.5, -15)
+    Textbox.Size = UDim2.new(0.6, -15, 0, 30)
+    Textbox.BackgroundColor3 = Colors.InputBg
+    Textbox.BorderSizePixel = 0
+    Textbox.Text = config.Default or ""
+    Textbox.PlaceholderText = config.Placeholder or "Enter text..."
+    Textbox.TextColor3 = Colors.Text
+    Textbox.PlaceholderColor3 = Colors.TextDim
+    Textbox.TextSize = 13
+    Textbox.Font = Enum.Font.Gotham
+    Textbox.ClearTextOnFocus = false
+    Textbox.Parent = TextboxFrame
+    
+    local TextboxBorder = Instance.new("UIStroke")
+    TextboxBorder.Color = Colors.Border
+    TextboxBorder.Thickness = 1
+    TextboxBorder.Parent = Textbox
+    
+    Textbox.FocusLost:Connect(function(enter)
+        if config.Callback then
+            config.Callback(Textbox.Text)
+        end
+    end)
+    
+    return {
+        SetValue = function(text)
+            Textbox.Text = text
+        end
+    }
+end
+
+function Spectrum:CreateKeybind(tab, config)
+    local KeybindFrame = CreateFrame(tab.Content, config.Name or "Keybind", UDim2.new(1, -10, 0, 40))
+    KeybindFrame.BackgroundColor3 = Colors.Button
+    
+    local KeybindLabel = Instance.new("TextLabel")
+    KeybindLabel.Position = UDim2.new(0, 10, 0, 0)
+    KeybindLabel.Size = UDim2.new(1, -110, 1, 0)
+    KeybindLabel.BackgroundTransparency = 1
+    KeybindLabel.Text = config.Text or "Keybind"
+    KeybindLabel.TextColor3 = Colors.Text
+    KeybindLabel.TextSize = 14
+    KeybindLabel.Font = Enum.Font.Gotham
+    KeybindLabel.TextXAlignment = Enum.TextXAlignment.Left
+    KeybindLabel.Parent = KeybindFrame
+    
+    local KeybindButton = Instance.new("TextButton")
+    KeybindButton.Name = "KeybindButton"
+    KeybindButton.Position = UDim2.new(1, -100, 0.5, -15)
+    KeybindButton.Size = UDim2.new(0, 90, 0, 30)
+    KeybindButton.BackgroundColor3 = Colors.Secondary
+    KeybindButton.BorderSizePixel = 0
+    KeybindButton.Text = config.Default or "None"
+    KeybindButton.TextColor3 = Colors.Text
+    KeybindButton.TextSize = 13
+    KeybindButton.Font = Enum.Font.Gotham
+    KeybindButton.Parent = KeybindFrame
+    
+    local KeybindBorder = Instance.new("UIStroke")
+    KeybindBorder.Color = Colors.Border
+    KeybindBorder.Thickness = 1
+    KeybindBorder.Parent = KeybindButton
+    
+    local CurrentKey = config.Default or "None"
+    local Binding = false
+    
+    KeybindButton.MouseButton1Click:Connect(function()
+        Binding = true
+        KeybindButton.Text = "..."
+        
+        local connection
+        connection = UserInputService.InputBegan:Connect(function(input, gameProcessed)
+            if Binding then
+                if input.KeyCode ~= Enum.KeyCode.Unknown then
+                    CurrentKey = input.KeyCode.Name
+                    KeybindButton.Text = CurrentKey
+                    Binding = false
+                    connection:Disconnect()
+                    
+                    if config.Callback then
+                        config.Callback(CurrentKey)
+                    end
+                end
+            end
+        end)
+    end)
+    
+    UserInputService.InputBegan:Connect(function(input, gameProcessed)
+        if not gameProcessed and input.KeyCode.Name == CurrentKey and config.Callback then
+            config.Callback(CurrentKey)
+        end
+    end)
+    
+    return {
+        SetValue = function(key)
+            CurrentKey = key
+            KeybindButton.Text = key
+        end
+    }
+end
+
+function Spectrum:CreateColorPicker(tab, config)
+    local ColorFrame = CreateFrame(tab.Content, config.Name or "ColorPicker", UDim2.new(1, -10, 0, 40))
+    ColorFrame.BackgroundColor3 = Colors.Button
+    
+    local ColorLabel = Instance.new("TextLabel")
+    ColorLabel.Position = UDim2.new(0, 10, 0, 0)
+    ColorLabel.Size = UDim2.new(1, -60, 1, 0)
+    ColorLabel.BackgroundTransparency = 1
+    ColorLabel.Text = config.Text or "Color Picker"
+    ColorLabel.TextColor3 = Colors.Text
+    ColorLabel.TextSize = 14
+    ColorLabel.Font = Enum.Font.Gotham
+    ColorLabel.TextXAlignment = Enum.TextXAlignment.Left
+    ColorLabel.Parent = ColorFrame
+    
+    local ColorDisplay = Instance.new("TextButton")
+    ColorDisplay.Name = "ColorDisplay"
+    ColorDisplay.Position = UDim2.new(1, -45, 0.5, -12.5)
+    ColorDisplay.Size = UDim2.new(0, 35, 0, 25)
+    ColorDisplay.BackgroundColor3 = config.Default or Color3.fromRGB(255, 255, 255)
+    ColorDisplay.BorderSizePixel = 0
+    ColorDisplay.Text = ""
+    ColorDisplay.Parent = ColorFrame
+    
+    local ColorBorder = Instance.new("UIStroke")
+    ColorBorder.Color = Colors.Border
+    ColorBorder.Thickness = 1
+    ColorBorder.Parent = ColorDisplay
+    
+    local CurrentColor = config.Default or Color3.fromRGB(255, 255, 255)
+    
+    ColorDisplay.MouseButton1Click:Connect(function()
+        if config.Callback then
+            config.Callback(CurrentColor)
+        end
+    end)
+    
+    return {
+        SetValue = function(color)
+            CurrentColor = color
+            ColorDisplay.BackgroundColor3 = color
+            if config.Callback then
+                config.Callback(color)
+            end
         end
     }
 end
