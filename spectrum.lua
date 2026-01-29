@@ -11,23 +11,23 @@ local HttpService = game:GetService("HttpService")
 local Player = Players.LocalPlayer
 
 local Colors = {
-    Background = Color3.fromRGB(0, 0, 0),
-    Secondary = Color3.fromRGB(0, 0, 0),
-    Border = Color3.fromRGB(255, 255, 255),
-    Accent = Color3.fromRGB(255, 255, 255),
-    Text = Color3.fromRGB(255, 255, 255),
+    Background = Color3.fromRGB(30, 30, 30),
+    Secondary = Color3.fromRGB(40, 40, 40),
+    Border = Color3.fromRGB(80, 80, 80),
+    Accent = Color3.fromRGB(0, 120, 215),
+    Text = Color3.fromRGB(240, 240, 240),
     TextDim = Color3.fromRGB(180, 180, 180),
-    ToggleEnabled = Color3.fromRGB(0, 255, 0),
-    ToggleDisabled = Color3.fromRGB(255, 0, 0),
-    Slider = Color3.fromRGB(255, 255, 255),
-    Button = Color3.fromRGB(0, 0, 0),
-    ButtonHover = Color3.fromRGB(20, 20, 20),
-    InputBg = Color3.fromRGB(10, 10, 10),
-    NotifyBg = Color3.fromRGB(15, 15, 15),
-    Success = Color3.fromRGB(0, 255, 0),
+    ToggleEnabled = Color3.fromRGB(0, 200, 0),
+    ToggleDisabled = Color3.fromRGB(200, 0, 0),
+    Slider = Color3.fromRGB(0, 120, 215),
+    Button = Color3.fromRGB(50, 50, 50),
+    ButtonHover = Color3.fromRGB(70, 70, 70),
+    InputBg = Color3.fromRGB(25, 25, 25),
+    NotifyBg = Color3.fromRGB(35, 35, 35),
+    Success = Color3.fromRGB(0, 200, 0),
     Warning = Color3.fromRGB(255, 165, 0),
-    Error = Color3.fromRGB(255, 0, 0),
-    Info = Color3.fromRGB(100, 150, 255)
+    Error = Color3.fromRGB(255, 50, 50),
+    Info = Color3.fromRGB(0, 120, 215)
 }
 
 local function Tween(instance, properties, duration)
@@ -358,7 +358,6 @@ local function CreateFrame(parent, name, size, position, cornerRadius)
     local border = Instance.new("UIStroke")
     border.Color = Colors.Border
     border.Thickness = 1
-    border.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
     border.Parent = frame
     
     return frame
@@ -368,33 +367,37 @@ function Spectrum:CreateWindow(config)
     local self = setmetatable({}, Spectrum)
     
     self.Title = config.Title or "Spectrum"
-    self.Author = config.Author or "gt"
+    self.Author = config.Author or "Anonymous"
     self.Icon = config.Icon or nil
     self.Tabs = {}
     self.CurrentTab = nil
     self.Notifications = {}
     
     self.ScreenGui = Instance.new("ScreenGui")
-    self.ScreenGui.Name = "Spectrum_" .. math.random(1000, 9999)
+    self.ScreenGui.Name = "Spectrum_" .. HttpService:GenerateGUID(false)
     self.ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
     self.ScreenGui.ResetOnSpawn = false
     
-    if gethui then
-        self.ScreenGui.Parent = gethui()
+    -- Proteção de GUI para executors
+    if protectgui then
+        protectgui(self.ScreenGui)
     elseif syn and syn.protect_gui then
         syn.protect_gui(self.ScreenGui)
-        self.ScreenGui.Parent = CoreGui
+    end
+    
+    if gethui then
+        self.ScreenGui.Parent = gethui()
     else
         self.ScreenGui.Parent = CoreGui
     end
     
-    self.Main = CreateFrame(self.ScreenGui, "Main", UDim2.new(0, 480, 0, 360), UDim2.new(0.5, -240, 0.5, -180), 8)
+    self.Main = CreateFrame(self.ScreenGui, "Main", UDim2.new(0, 500, 0, 400), UDim2.new(0.5, -250, 0.5, -200), 8)
     self.Main.BackgroundColor3 = Colors.Background
     
     local dragging, dragInput, dragStart, startPos
     
     self.Main.InputBegan:Connect(function(input)
-        if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+        if input.UserInputType == Enum.UserInputType.MouseButton1 then
             dragging = true
             dragStart = input.Position
             startPos = self.Main.Position
@@ -408,7 +411,7 @@ function Spectrum:CreateWindow(config)
     end)
     
     self.Main.InputChanged:Connect(function(input)
-        if input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch then
+        if input.UserInputType == Enum.UserInputType.MouseMovement then
             dragInput = input
         end
     end)
@@ -425,42 +428,44 @@ function Spectrum:CreateWindow(config)
     
     if self.Icon then
         local IconFrame = CreateIcon(Header, self.Icon, 30)
-        IconFrame.Position = UDim2.new(0, 10, 0.5, -15)
+        IconFrame.Position = UDim2.new(0, 15, 0.5, -15)
     end
     
     local TitleLabel = Instance.new("TextLabel")
     TitleLabel.Name = "Title"
-    TitleLabel.Position = UDim2.new(0, self.Icon and 50 or 10, 0, 5)
-    TitleLabel.Size = UDim2.new(0, 200, 0, 25)
+    TitleLabel.Position = UDim2.new(0, self.Icon and 55 or 15, 0, 5)
+    TitleLabel.Size = UDim2.new(0, 300, 0, 25)
     TitleLabel.BackgroundTransparency = 1
     TitleLabel.Text = self.Title
     TitleLabel.TextColor3 = Colors.Text
-    TitleLabel.TextSize = 18
+    TitleLabel.TextSize = 20
     TitleLabel.Font = Enum.Font.GothamBold
     TitleLabel.TextXAlignment = Enum.TextXAlignment.Left
+    TitleLabel.TextYAlignment = Enum.TextYAlignment.Top
     TitleLabel.Parent = Header
     
     local AuthorLabel = Instance.new("TextLabel")
     AuthorLabel.Name = "Author"
-    AuthorLabel.Position = UDim2.new(0, self.Icon and 50 or 10, 0, 28)
-    AuthorLabel.Size = UDim2.new(0, 200, 0, 17)
+    AuthorLabel.Position = UDim2.new(0, self.Icon and 55 or 15, 0, 30)
+    AuthorLabel.Size = UDim2.new(0, 300, 0, 15)
     AuthorLabel.BackgroundTransparency = 1
     AuthorLabel.Text = "by " .. self.Author
     AuthorLabel.TextColor3 = Colors.TextDim
     AuthorLabel.TextSize = 12
     AuthorLabel.Font = Enum.Font.Gotham
     AuthorLabel.TextXAlignment = Enum.TextXAlignment.Left
+    AuthorLabel.TextYAlignment = Enum.TextYAlignment.Top
     AuthorLabel.Parent = Header
     
     local CloseBtn = Instance.new("TextButton")
     CloseBtn.Name = "Close"
     CloseBtn.Size = UDim2.new(0, 40, 0, 40)
-    CloseBtn.Position = UDim2.new(1, -45, 0, 5)
+    CloseBtn.Position = UDim2.new(1, -50, 0, 5)
     CloseBtn.BackgroundColor3 = Colors.Secondary
     CloseBtn.BorderSizePixel = 0
     CloseBtn.Text = "×"
     CloseBtn.TextColor3 = Colors.Text
-    CloseBtn.TextSize = 24
+    CloseBtn.TextSize = 28
     CloseBtn.Font = Enum.Font.GothamBold
     CloseBtn.Parent = Header
     
@@ -485,18 +490,20 @@ function Spectrum:CreateWindow(config)
         Tween(CloseBtn, {BackgroundColor3 = Colors.Secondary})
     end)
     
-    self.TabContainer = CreateFrame(self.Main, "TabContainer", UDim2.new(0, 150, 1, -60), UDim2.new(0, 5, 0, 55), 6)
+    self.TabContainer = CreateFrame(self.Main, "TabContainer", UDim2.new(0, 160, 1, -70), UDim2.new(0, 10, 0, 60), 6)
+    self.TabContainer.BackgroundColor3 = Colors.Background
     
     local TabList = Instance.new("UIListLayout")
     TabList.SortOrder = Enum.SortOrder.LayoutOrder
-    TabList.Padding = UDim.new(0, 5)
+    TabList.Padding = UDim.new(0, 8)
     TabList.Parent = self.TabContainer
     
-    self.ContentContainer = CreateFrame(self.Main, "ContentContainer", UDim2.new(1, -165, 1, -60), UDim2.new(0, 160, 0, 55), 6)
+    self.ContentContainer = CreateFrame(self.Main, "ContentContainer", UDim2.new(1, -180, 1, -70), UDim2.new(0, 170, 0, 60), 6)
+    self.ContentContainer.BackgroundColor3 = Colors.Background
     
     self.NotificationContainer = Instance.new("Frame")
     self.NotificationContainer.Name = "Notifications"
-    self.NotificationContainer.Position = UDim2.new(1, -310, 0, 10)
+    self.NotificationContainer.Position = UDim2.new(1, -320, 0, 10)
     self.NotificationContainer.Size = UDim2.new(0, 300, 1, -20)
     self.NotificationContainer.BackgroundTransparency = 1
     self.NotificationContainer.Parent = self.ScreenGui
@@ -511,9 +518,8 @@ function Spectrum:CreateWindow(config)
 end
 
 function Spectrum:Notify(config)
-    local NotifFrame = CreateFrame(self.NotificationContainer, "Notification", UDim2.new(1, 0, 0, 80), nil, 8)
+    local NotifFrame = CreateFrame(self.NotificationContainer, "Notification", UDim2.new(1, 0, 0, 90), nil, 8)
     NotifFrame.BackgroundColor3 = Colors.NotifyBg
-    NotifFrame.Position = UDim2.new(1, 10, 1, 0)
     
     local typeColors = {
         success = Colors.Success,
@@ -534,50 +540,53 @@ function Spectrum:Notify(config)
     
     local AccentBar = Instance.new("Frame")
     AccentBar.Name = "Accent"
-    AccentBar.Size = UDim2.new(0, 4, 1, 0)
+    AccentBar.Size = UDim2.new(0, 5, 1, -16)
+    AccentBar.Position = UDim2.new(0, 0, 0, 8)
     AccentBar.BackgroundColor3 = accentColor
     AccentBar.BorderSizePixel = 0
     AccentBar.Parent = NotifFrame
     
     local AccentCorner = Instance.new("UICorner")
-    AccentCorner.CornerRadius = UDim.new(1, 0)
+    AccentCorner.CornerRadius = UDim.new(0, 2)
     AccentCorner.Parent = AccentBar
     
     if config.Icon or typeIcons[notifType] then
         local NotifIcon = CreateIcon(NotifFrame, config.Icon or typeIcons[notifType], 24)
-        NotifIcon.Position = UDim2.new(0, 15, 0, 12)
+        NotifIcon.Position = UDim2.new(0, 20, 0, 15)
         NotifIcon.ImageColor3 = accentColor
     end
     
     local TitleLabel = Instance.new("TextLabel")
-    TitleLabel.Position = UDim2.new(0, 50, 0, 10)
-    TitleLabel.Size = UDim2.new(1, -60, 0, 20)
+    TitleLabel.Position = UDim2.new(0, 55, 0, 12)
+    TitleLabel.Size = UDim2.new(1, -60, 0, 24)
     TitleLabel.BackgroundTransparency = 1
     TitleLabel.Text = config.Title or "Notification"
     TitleLabel.TextColor3 = Colors.Text
-    TitleLabel.TextSize = 14
+    TitleLabel.TextSize = 16
     TitleLabel.Font = Enum.Font.GothamBold
     TitleLabel.TextXAlignment = Enum.TextXAlignment.Left
+    TitleLabel.TextYAlignment = Enum.TextYAlignment.Top
     TitleLabel.Parent = NotifFrame
     
     local ContentLabel = Instance.new("TextLabel")
-    ContentLabel.Position = UDim2.new(0, 50, 0, 32)
-    ContentLabel.Size = UDim2.new(1, -60, 0, 40)
+    ContentLabel.Position = UDim2.new(0, 55, 0, 38)
+    ContentLabel.Size = UDim2.new(1, -60, 0, 45)
     ContentLabel.BackgroundTransparency = 1
     ContentLabel.Text = config.Content or ""
     ContentLabel.TextColor3 = Colors.TextDim
-    ContentLabel.TextSize = 12
+    ContentLabel.TextSize = 14
     ContentLabel.Font = Enum.Font.Gotham
     ContentLabel.TextXAlignment = Enum.TextXAlignment.Left
     ContentLabel.TextYAlignment = Enum.TextYAlignment.Top
     ContentLabel.TextWrapped = true
     ContentLabel.Parent = NotifFrame
     
-    Tween(NotifFrame, {Position = UDim2.new(0, 0, 1, -90)}, 0.5)
+    NotifFrame.Position = UDim2.new(1, 10, 1, 0)
+    Tween(NotifFrame, {Position = UDim2.new(0, 0, 1, -100)}, 0.3)
     
     task.delay(config.Duration or 5, function()
-        Tween(NotifFrame, {Position = UDim2.new(1, 10, 1, -90)}, 0.5)
-        task.wait(0.5)
+        Tween(NotifFrame, {Position = UDim2.new(1, 10, 1, -100)}, 0.3)
+        task.wait(0.3)
         NotifFrame:Destroy()
     end)
     
@@ -589,10 +598,11 @@ function Spectrum:AddTab(config)
     Tab.Name = config.Name or "Tab"
     Tab.Icon = config.Icon or nil
     Tab.Elements = {}
+    Tab.Window = self  -- Adiciona referência à janela
     
     Tab.Button = Instance.new("TextButton")
     Tab.Button.Name = Tab.Name
-    Tab.Button.Size = UDim2.new(1, 0, 0, 40)
+    Tab.Button.Size = UDim2.new(1, 0, 0, 45)
     Tab.Button.BackgroundColor3 = Colors.Secondary
     Tab.Button.BorderSizePixel = 0
     Tab.Button.Text = ""
@@ -608,17 +618,17 @@ function Spectrum:AddTab(config)
     TabBorder.Parent = Tab.Button
     
     if Tab.Icon then
-        local TabIcon = CreateIcon(Tab.Button, Tab.Icon, 20)
-        TabIcon.Position = UDim2.new(0, 10, 0.5, -10)
+        local TabIcon = CreateIcon(Tab.Button, Tab.Icon, 22)
+        TabIcon.Position = UDim2.new(0, 15, 0.5, -11)
     end
     
     local TabLabel = Instance.new("TextLabel")
-    TabLabel.Position = UDim2.new(0, Tab.Icon and 40 or 10, 0, 0)
-    TabLabel.Size = UDim2.new(1, Tab.Icon and -40 or -10, 1, 0)
+    TabLabel.Position = UDim2.new(0, Tab.Icon and 45 or 15, 0, 0)
+    TabLabel.Size = UDim2.new(1, Tab.Icon and -45 or -15, 1, 0)
     TabLabel.BackgroundTransparency = 1
     TabLabel.Text = Tab.Name
     TabLabel.TextColor3 = Colors.TextDim
-    TabLabel.TextSize = 14
+    TabLabel.TextSize = 15
     TabLabel.Font = Enum.Font.Gotham
     TabLabel.TextXAlignment = Enum.TextXAlignment.Left
     TabLabel.Parent = Tab.Button
@@ -630,6 +640,7 @@ function Spectrum:AddTab(config)
     Tab.Content.BorderSizePixel = 0
     Tab.Content.ScrollBarThickness = 6
     Tab.Content.ScrollBarImageColor3 = Colors.Border
+    Tab.Content.ScrollBarImageTransparency = 0.7
     Tab.Content.CanvasSize = UDim2.new(0, 0, 0, 0)
     Tab.Content.Visible = false
     Tab.Content.ClipsDescendants = true
@@ -638,14 +649,14 @@ function Spectrum:AddTab(config)
     
     local ContentList = Instance.new("UIListLayout")
     ContentList.SortOrder = Enum.SortOrder.LayoutOrder
-    ContentList.Padding = UDim.new(0, 8)
+    ContentList.Padding = UDim.new(0, 10)
     ContentList.Parent = Tab.Content
     
     local ContentPadding = Instance.new("UIPadding")
-    ContentPadding.PaddingTop = UDim.new(0, 10)
-    ContentPadding.PaddingBottom = UDim.new(0, 10)
-    ContentPadding.PaddingLeft = UDim.new(0, 10)
-    ContentPadding.PaddingRight = UDim.new(0, 16)
+    ContentPadding.PaddingTop = UDim.new(0, 15)
+    ContentPadding.PaddingBottom = UDim.new(0, 15)
+    ContentPadding.PaddingLeft = UDim.new(0, 15)
+    ContentPadding.PaddingRight = UDim.new(0, 15)
     ContentPadding.Parent = Tab.Content
     
     Tab.Button.MouseButton1Click:Connect(function()
@@ -664,44 +675,45 @@ function Spectrum:AddTab(config)
         end
     end)
     
+    -- Corrigido: Usar a referência correta
     function Tab:Button(config)
-        return Spectrum:CreateButton(Tab, config)
+        return self.Window:CreateButton(self, config)
     end
     
     function Tab:Toggle(config)
-        return Spectrum:CreateToggle(Tab, config)
+        return self.Window:CreateToggle(self, config)
     end
     
     function Tab:Slider(config)
-        return Spectrum:CreateSlider(Tab, config)
+        return self.Window:CreateSlider(self, config)
     end
     
     function Tab:Dropdown(config)
-        return Spectrum:CreateDropdown(Tab, config)
+        return self.Window:CreateDropdown(self, config)
     end
     
     function Tab:Textbox(config)
-        return Spectrum:CreateTextbox(Tab, config)
+        return self.Window:CreateTextbox(self, config)
     end
     
     function Tab:Keybind(config)
-        return Spectrum:CreateKeybind(Tab, config)
+        return self.Window:CreateKeybind(self, config)
     end
     
     function Tab:ColorPicker(config)
-        return Spectrum:CreateColorPicker(Tab, config)
+        return self.Window:CreateColorPicker(self, config)
     end
     
     function Tab:Paragraph(config)
-        return Spectrum:CreateParagraph(Tab, config)
+        return self.Window:CreateParagraph(self, config)
     end
     
     function Tab:Label(text)
-        return Spectrum:CreateLabel(Tab, text)
+        return self.Window:CreateLabel(self, text)
     end
     
     function Tab:Divider()
-        return Spectrum:CreateDivider(Tab)
+        return self.Window:CreateDivider(self)
     end
     
     table.insert(self.Tabs, Tab)
@@ -726,8 +738,9 @@ function Spectrum:SelectTab(tab)
     self.CurrentTab = tab
 end
 
+-- CORRIGIDO: Todas as funções de criação agora usam self (Window) corretamente
 function Spectrum:CreateButton(tab, config)
-    local ButtonFrame = CreateFrame(tab.Content, config.Name or "Button", UDim2.new(1, -10, 0, 40), nil, 6)
+    local ButtonFrame = CreateFrame(tab.Content, config.Name or "Button", UDim2.new(1, 0, 0, 45), nil, 6)
     ButtonFrame.BackgroundColor3 = Colors.Button
     
     local Button = Instance.new("TextButton")
@@ -737,22 +750,22 @@ function Spectrum:CreateButton(tab, config)
     Button.Parent = ButtonFrame
     
     local ButtonLabel = Instance.new("TextLabel")
-    ButtonLabel.Position = UDim2.new(0, 10, 0, 0)
+    ButtonLabel.Position = UDim2.new(0, 15, 0, 0)
     ButtonLabel.Size = UDim2.new(1, -50, 1, 0)
     ButtonLabel.BackgroundTransparency = 1
     ButtonLabel.Text = config.Text or "Button"
     ButtonLabel.TextColor3 = Colors.Text
-    ButtonLabel.TextSize = 14
+    ButtonLabel.TextSize = 15
     ButtonLabel.Font = Enum.Font.Gotham
     ButtonLabel.TextXAlignment = Enum.TextXAlignment.Left
     ButtonLabel.Parent = ButtonFrame
     
-    local ClickIcon = CreateIcon(ButtonFrame, "mouse-pointer", 18)
-    ClickIcon.Position = UDim2.new(1, -28, 0.5, -9)
+    local ClickIcon = CreateIcon(ButtonFrame, "mouse-pointer", 20)
+    ClickIcon.Position = UDim2.new(1, -35, 0.5, -10)
     
     Button.MouseButton1Click:Connect(function()
         if config.Callback then
-            config.Callback()
+            task.spawn(config.Callback)
         end
     end)
     
@@ -768,24 +781,24 @@ function Spectrum:CreateButton(tab, config)
 end
 
 function Spectrum:CreateToggle(tab, config)
-    local ToggleFrame = CreateFrame(tab.Content, config.Name or "Toggle", UDim2.new(1, -10, 0, 40), nil, 6)
+    local ToggleFrame = CreateFrame(tab.Content, config.Name or "Toggle", UDim2.new(1, 0, 0, 45), nil, 6)
     ToggleFrame.BackgroundColor3 = Colors.Button
     
     local ToggleLabel = Instance.new("TextLabel")
-    ToggleLabel.Position = UDim2.new(0, 10, 0, 0)
-    ToggleLabel.Size = UDim2.new(1, -60, 1, 0)
+    ToggleLabel.Position = UDim2.new(0, 15, 0, 0)
+    ToggleLabel.Size = UDim2.new(1, -70, 1, 0)
     ToggleLabel.BackgroundTransparency = 1
     ToggleLabel.Text = config.Text or "Toggle"
     ToggleLabel.TextColor3 = Colors.Text
-    ToggleLabel.TextSize = 14
+    ToggleLabel.TextSize = 15
     ToggleLabel.Font = Enum.Font.Gotham
     ToggleLabel.TextXAlignment = Enum.TextXAlignment.Left
     ToggleLabel.Parent = ToggleFrame
     
     local ToggleButton = Instance.new("TextButton")
     ToggleButton.Name = "ToggleButton"
-    ToggleButton.Position = UDim2.new(1, -45, 0.5, -10)
-    ToggleButton.Size = UDim2.new(0, 40, 0, 20)
+    ToggleButton.Position = UDim2.new(1, -55, 0.5, -12)
+    ToggleButton.Size = UDim2.new(0, 50, 0, 24)
     ToggleButton.BackgroundColor3 = Colors.ToggleDisabled
     ToggleButton.BorderSizePixel = 0
     ToggleButton.Text = ""
@@ -802,8 +815,8 @@ function Spectrum:CreateToggle(tab, config)
     
     local ToggleCircle = Instance.new("Frame")
     ToggleCircle.Name = "Circle"
-    ToggleCircle.Position = UDim2.new(0, 2, 0.5, -8)
-    ToggleCircle.Size = UDim2.new(0, 16, 0, 16)
+    ToggleCircle.Position = UDim2.new(0, 3, 0.5, -9)
+    ToggleCircle.Size = UDim2.new(0, 18, 0, 18)
     ToggleCircle.BackgroundColor3 = Colors.Text
     ToggleCircle.BorderSizePixel = 0
     ToggleCircle.Parent = ToggleButton
@@ -817,14 +830,14 @@ function Spectrum:CreateToggle(tab, config)
     local function UpdateToggle()
         if State then
             Tween(ToggleButton, {BackgroundColor3 = Colors.ToggleEnabled})
-            Tween(ToggleCircle, {Position = UDim2.new(1, -18, 0.5, -8)})
+            Tween(ToggleCircle, {Position = UDim2.new(1, -21, 0.5, -9)})
         else
             Tween(ToggleButton, {BackgroundColor3 = Colors.ToggleDisabled})
-            Tween(ToggleCircle, {Position = UDim2.new(0, 2, 0.5, -8)})
+            Tween(ToggleCircle, {Position = UDim2.new(0, 3, 0.5, -9)})
         end
         
         if config.Callback then
-            config.Callback(State)
+            task.spawn(config.Callback, State)
         end
     end
     
@@ -835,7 +848,7 @@ function Spectrum:CreateToggle(tab, config)
     
     UpdateToggle()
     
-    return {
+    local ToggleObj = {
         Set = function(value)
             State = value
             UpdateToggle()
@@ -844,32 +857,36 @@ function Spectrum:CreateToggle(tab, config)
             return State
         end
     }
+    
+    ToggleFrame:SetAttribute("ToggleObject", ToggleObj)
+    
+    return ToggleObj
 end
 
 function Spectrum:CreateSlider(tab, config)
-    local SliderFrame = CreateFrame(tab.Content, config.Name or "Slider", UDim2.new(1, -10, 0, 70), nil, 6)
+    local SliderFrame = CreateFrame(tab.Content, config.Name or "Slider", UDim2.new(1, 0, 0, 85), nil, 6)
     SliderFrame.BackgroundColor3 = Colors.Button
     
     local SliderLabel = Instance.new("TextLabel")
-    SliderLabel.Position = UDim2.new(0, 10, 0, 5)
-    SliderLabel.Size = UDim2.new(1, -20, 0, 20)
+    SliderLabel.Position = UDim2.new(0, 15, 0, 8)
+    SliderLabel.Size = UDim2.new(1, -30, 0, 20)
     SliderLabel.BackgroundTransparency = 1
     SliderLabel.Text = config.Text or "Slider"
     SliderLabel.TextColor3 = Colors.Text
-    SliderLabel.TextSize = 14
+    SliderLabel.TextSize = 15
     SliderLabel.Font = Enum.Font.Gotham
     SliderLabel.TextXAlignment = Enum.TextXAlignment.Left
     SliderLabel.Parent = SliderFrame
     
     local InputBox = Instance.new("TextBox")
     InputBox.Name = "InputBox"
-    InputBox.Position = UDim2.new(1, -60, 0, 5)
-    InputBox.Size = UDim2.new(0, 50, 0, 20)
-    InputBox.BackgroundColor3 = Colors.Secondary
+    InputBox.Position = UDim2.new(1, -70, 0, 8)
+    InputBox.Size = UDim2.new(0, 55, 0, 24)
+    InputBox.BackgroundColor3 = Colors.InputBg
     InputBox.BorderSizePixel = 0
     InputBox.Text = tostring(config.Default or config.Min or 0)
     InputBox.TextColor3 = Colors.Text
-    InputBox.TextSize = 12
+    InputBox.TextSize = 14
     InputBox.Font = Enum.Font.Gotham
     InputBox.ClearTextOnFocus = false
     InputBox.Parent = SliderFrame
@@ -883,7 +900,7 @@ function Spectrum:CreateSlider(tab, config)
     InputBorder.Thickness = 1
     InputBorder.Parent = InputBox
     
-    local SliderTrack = CreateFrame(SliderFrame, "Track", UDim2.new(1, -20, 0, 6), UDim2.new(0, 10, 0, 38), 3)
+    local SliderTrack = CreateFrame(SliderFrame, "Track", UDim2.new(1, -30, 0, 8), UDim2.new(0, 15, 0, 50), 4)
     SliderTrack.BackgroundColor3 = Colors.Secondary
     
     local SliderFill = Instance.new("Frame")
@@ -894,18 +911,18 @@ function Spectrum:CreateSlider(tab, config)
     SliderFill.Parent = SliderTrack
     
     local FillCorner = Instance.new("UICorner")
-    FillCorner.CornerRadius = UDim.new(0, 3)
+    FillCorner.CornerRadius = UDim.new(0, 4)
     FillCorner.Parent = SliderFill
     
     local ValueLabel = Instance.new("TextLabel")
-    ValueLabel.Position = UDim2.new(0, 10, 0, 50)
-    ValueLabel.Size = UDim2.new(1, -20, 0, 15)
+    ValueLabel.Position = UDim2.new(0, 15, 0, 65)
+    ValueLabel.Size = UDim2.new(1, -30, 0, 15)
     ValueLabel.BackgroundTransparency = 1
     ValueLabel.Text = tostring(config.Default or config.Min or 0)
     ValueLabel.TextColor3 = Colors.TextDim
-    ValueLabel.TextSize = 12
+    ValueLabel.TextSize = 13
     ValueLabel.Font = Enum.Font.Gotham
-    ValueLabel.TextXAlignment = Enum.TextXAlignment.Center
+    ValueLabel.TextXAlignment = Enum.TextXAlignment.Left
     ValueLabel.Parent = SliderFrame
     
     local Min = config.Min or 0
@@ -926,7 +943,7 @@ function Spectrum:CreateSlider(tab, config)
         InputBox.Text = tostring(Value)
         
         if config.Callback then
-            config.Callback(Value)
+            task.spawn(config.Callback, Value)
         end
     end
     
@@ -942,7 +959,7 @@ function Spectrum:CreateSlider(tab, config)
     local dragging = false
     
     SliderTrack.InputBegan:Connect(function(input)
-        if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+        if input.UserInputType == Enum.UserInputType.MouseButton1 then
             dragging = true
             
             local function Update()
@@ -967,7 +984,7 @@ function Spectrum:CreateSlider(tab, config)
     end)
     
     UserInputService.InputChanged:Connect(function(input)
-        if dragging and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
+        if dragging and input.UserInputType == Enum.UserInputType.MouseMovement then
             local mousePos = UserInputService:GetMouseLocation().X
             local trackPos = SliderTrack.AbsolutePosition.X
             local trackSize = SliderTrack.AbsoluteSize.X
@@ -979,7 +996,7 @@ function Spectrum:CreateSlider(tab, config)
     
     UpdateSlider(Value)
     
-    return {
+    local SliderObj = {
         Set = function(value)
             UpdateSlider(value)
         end,
@@ -987,28 +1004,32 @@ function Spectrum:CreateSlider(tab, config)
             return Value
         end
     }
+    
+    SliderFrame:SetAttribute("SliderObject", SliderObj)
+    
+    return SliderObj
 end
 
 function Spectrum:CreateDropdown(tab, config)
     local Multi = config.Multi or false
-    local DropdownFrame = CreateFrame(tab.Content, config.Name or "Dropdown", UDim2.new(1, -10, 0, 40), nil, 6)
+    local DropdownFrame = CreateFrame(tab.Content, config.Name or "Dropdown", UDim2.new(1, 0, 0, 45), nil, 6)
     DropdownFrame.BackgroundColor3 = Colors.Button
     DropdownFrame.ClipsDescendants = true
     
     local DropdownLabel = Instance.new("TextLabel")
-    DropdownLabel.Position = UDim2.new(0, 10, 0, 0)
-    DropdownLabel.Size = UDim2.new(1, -40, 0, 40)
+    DropdownLabel.Position = UDim2.new(0, 15, 0, 0)
+    DropdownLabel.Size = UDim2.new(1, -45, 1, 0)
     DropdownLabel.BackgroundTransparency = 1
     DropdownLabel.Text = config.Text or "Dropdown"
     DropdownLabel.TextColor3 = Colors.Text
-    DropdownLabel.TextSize = 14
+    DropdownLabel.TextSize = 15
     DropdownLabel.Font = Enum.Font.Gotham
     DropdownLabel.TextXAlignment = Enum.TextXAlignment.Left
     DropdownLabel.Parent = DropdownFrame
     
     local Arrow = Instance.new("TextLabel")
-    Arrow.Position = UDim2.new(1, -30, 0, 0)
-    Arrow.Size = UDim2.new(0, 30, 0, 40)
+    Arrow.Position = UDim2.new(1, -35, 0, 0)
+    Arrow.Size = UDim2.new(0, 30, 1, 0)
     Arrow.BackgroundTransparency = 1
     Arrow.Text = "▼"
     Arrow.TextColor3 = Colors.Text
@@ -1018,7 +1039,7 @@ function Spectrum:CreateDropdown(tab, config)
     
     local OptionsFrame = Instance.new("Frame")
     OptionsFrame.Name = "Options"
-    OptionsFrame.Position = UDim2.new(0, 0, 0, 40)
+    OptionsFrame.Position = UDim2.new(0, 0, 0, 45)
     OptionsFrame.Size = UDim2.new(1, 0, 0, 0)
     OptionsFrame.BackgroundColor3 = Colors.Secondary
     OptionsFrame.BorderSizePixel = 0
@@ -1060,7 +1081,7 @@ function Spectrum:CreateDropdown(tab, config)
     for _, option in ipairs(config.Options or {}) do
         local OptionButton = Instance.new("TextButton")
         OptionButton.Name = option
-        OptionButton.Size = UDim2.new(1, 0, 0, 35)
+        OptionButton.Size = UDim2.new(1, 0, 0, 40)
         OptionButton.BackgroundColor3 = Colors.Secondary
         OptionButton.BorderSizePixel = 0
         OptionButton.Text = ""
@@ -1069,16 +1090,15 @@ function Spectrum:CreateDropdown(tab, config)
         local OptionBorder = Instance.new("UIStroke")
         OptionBorder.Color = Colors.Border
         OptionBorder.Thickness = 1
-        OptionBorder.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
         OptionBorder.Parent = OptionButton
         
         local OptionLabel = Instance.new("TextLabel")
-        OptionLabel.Position = UDim2.new(0, 10, 0, 0)
-        OptionLabel.Size = UDim2.new(1, Multi and -40 or -10, 1, 0)
+        OptionLabel.Position = UDim2.new(0, 15, 0, 0)
+        OptionLabel.Size = UDim2.new(1, Multi and -45 or -15, 1, 0)
         OptionLabel.BackgroundTransparency = 1
         OptionLabel.Text = option
         OptionLabel.TextColor3 = Colors.Text
-        OptionLabel.TextSize = 13
+        OptionLabel.TextSize = 14
         OptionLabel.Font = Enum.Font.Gotham
         OptionLabel.TextXAlignment = Enum.TextXAlignment.Left
         OptionLabel.Parent = OptionButton
@@ -1086,8 +1106,8 @@ function Spectrum:CreateDropdown(tab, config)
         if Multi then
             local Checkbox = Instance.new("Frame")
             Checkbox.Name = "Checkbox"
-            Checkbox.Position = UDim2.new(1, -30, 0.5, -8)
-            Checkbox.Size = UDim2.new(0, 16, 0, 16)
+            Checkbox.Position = UDim2.new(1, -35, 0.5, -9)
+            Checkbox.Size = UDim2.new(0, 18, 0, 18)
             Checkbox.BackgroundColor3 = Colors.Secondary
             Checkbox.BorderSizePixel = 0
             Checkbox.Parent = OptionButton
@@ -1122,7 +1142,7 @@ function Spectrum:CreateDropdown(tab, config)
                     for item, _ in pairs(Selected) do
                         table.insert(selectedList, item)
                     end
-                    config.Callback(selectedList)
+                    task.spawn(config.Callback, selectedList)
                 end
             end)
         else
@@ -1131,11 +1151,11 @@ function Spectrum:CreateDropdown(tab, config)
                 UpdateLabel()
                 Open = false
                 
-                Tween(DropdownFrame, {Size = UDim2.new(1, -10, 0, 40)})
+                Tween(DropdownFrame, {Size = UDim2.new(1, 0, 0, 45)})
                 Tween(Arrow, {Rotation = 0})
                 
                 if config.Callback then
-                    config.Callback(Selected)
+                    task.spawn(config.Callback, Selected)
                 end
             end)
         end
@@ -1150,7 +1170,7 @@ function Spectrum:CreateDropdown(tab, config)
     end
     
     local DropdownButton = Instance.new("TextButton")
-    DropdownButton.Size = UDim2.new(1, 0, 0, 40)
+    DropdownButton.Size = UDim2.new(1, 0, 0, 45)
     DropdownButton.BackgroundTransparency = 1
     DropdownButton.Text = ""
     DropdownButton.Parent = DropdownFrame
@@ -1160,18 +1180,18 @@ function Spectrum:CreateDropdown(tab, config)
         
         if Open then
             local optionCount = #(config.Options or {})
-            local height = 40 + (optionCount * 35)
-            Tween(DropdownFrame, {Size = UDim2.new(1, -10, 0, height)})
+            local height = 45 + (optionCount * 40)
+            Tween(DropdownFrame, {Size = UDim2.new(1, 0, 0, height)})
             Tween(Arrow, {Rotation = 180})
         else
-            Tween(DropdownFrame, {Size = UDim2.new(1, -10, 0, 40)})
+            Tween(DropdownFrame, {Size = UDim2.new(1, 0, 0, 45)})
             Tween(Arrow, {Rotation = 0})
         end
     end)
     
     UpdateLabel()
     
-    return {
+    local DropdownObj = {
         Set = function(value)
             if Multi then
                 Selected = {}
@@ -1195,19 +1215,23 @@ function Spectrum:CreateDropdown(tab, config)
             end
         end
     }
+    
+    DropdownFrame:SetAttribute("DropdownObject", DropdownObj)
+    
+    return DropdownObj
 end
 
 function Spectrum:CreateTextbox(tab, config)
-    local TextboxFrame = CreateFrame(tab.Content, config.Name or "Textbox", UDim2.new(1, -10, 0, 40), nil, 6)
+    local TextboxFrame = CreateFrame(tab.Content, config.Name or "Textbox", UDim2.new(1, 0, 0, 45), nil, 6)
     TextboxFrame.BackgroundColor3 = Colors.Button
     
     local TextboxLabel = Instance.new("TextLabel")
-    TextboxLabel.Position = UDim2.new(0, 10, 0, 0)
-    TextboxLabel.Size = UDim2.new(0.4, -10, 1, 0)
+    TextboxLabel.Position = UDim2.new(0, 15, 0, 0)
+    TextboxLabel.Size = UDim2.new(0.4, -15, 1, 0)
     TextboxLabel.BackgroundTransparency = 1
     TextboxLabel.Text = config.Text or "Textbox"
     TextboxLabel.TextColor3 = Colors.Text
-    TextboxLabel.TextSize = 14
+    TextboxLabel.TextSize = 15
     TextboxLabel.Font = Enum.Font.Gotham
     TextboxLabel.TextXAlignment = Enum.TextXAlignment.Left
     TextboxLabel.Parent = TextboxFrame
@@ -1215,14 +1239,14 @@ function Spectrum:CreateTextbox(tab, config)
     local Textbox = Instance.new("TextBox")
     Textbox.Name = "Textbox"
     Textbox.Position = UDim2.new(0.4, 5, 0.5, -15)
-    Textbox.Size = UDim2.new(0.6, -15, 0, 30)
+    Textbox.Size = UDim2.new(0.6, -20, 0, 30)
     Textbox.BackgroundColor3 = Colors.InputBg
     Textbox.BorderSizePixel = 0
     Textbox.Text = config.Default or ""
     Textbox.PlaceholderText = config.Placeholder or "Enter text..."
     Textbox.TextColor3 = Colors.Text
     Textbox.PlaceholderColor3 = Colors.TextDim
-    Textbox.TextSize = 13
+    Textbox.TextSize = 14
     Textbox.Font = Enum.Font.Gotham
     Textbox.ClearTextOnFocus = false
     Textbox.Parent = TextboxFrame
@@ -1237,12 +1261,12 @@ function Spectrum:CreateTextbox(tab, config)
     TextboxBorder.Parent = Textbox
     
     Textbox.FocusLost:Connect(function(enter)
-        if config.Callback then
-            config.Callback(Textbox.Text)
+        if enter and config.Callback then
+            task.spawn(config.Callback, Textbox.Text)
         end
     end)
     
-    return {
+    local TextboxObj = {
         Set = function(text)
             Textbox.Text = text
         end,
@@ -1250,32 +1274,36 @@ function Spectrum:CreateTextbox(tab, config)
             return Textbox.Text
         end
     }
+    
+    TextboxFrame:SetAttribute("TextboxObject", TextboxObj)
+    
+    return TextboxObj
 end
 
 function Spectrum:CreateKeybind(tab, config)
-    local KeybindFrame = CreateFrame(tab.Content, config.Name or "Keybind", UDim2.new(1, -10, 0, 40), nil, 6)
+    local KeybindFrame = CreateFrame(tab.Content, config.Name or "Keybind", UDim2.new(1, 0, 0, 45), nil, 6)
     KeybindFrame.BackgroundColor3 = Colors.Button
     
     local KeybindLabel = Instance.new("TextLabel")
-    KeybindLabel.Position = UDim2.new(0, 10, 0, 0)
-    KeybindLabel.Size = UDim2.new(1, -110, 1, 0)
+    KeybindLabel.Position = UDim2.new(0, 15, 0, 0)
+    KeybindLabel.Size = UDim2.new(1, -120, 1, 0)
     KeybindLabel.BackgroundTransparency = 1
     KeybindLabel.Text = config.Text or "Keybind"
     KeybindLabel.TextColor3 = Colors.Text
-    KeybindLabel.TextSize = 14
+    KeybindLabel.TextSize = 15
     KeybindLabel.Font = Enum.Font.Gotham
     KeybindLabel.TextXAlignment = Enum.TextXAlignment.Left
     KeybindLabel.Parent = KeybindFrame
     
     local KeybindButton = Instance.new("TextButton")
     KeybindButton.Name = "KeybindButton"
-    KeybindButton.Position = UDim2.new(1, -100, 0.5, -15)
-    KeybindButton.Size = UDim2.new(0, 90, 0, 30)
+    KeybindButton.Position = UDim2.new(1, -110, 0.5, -15)
+    KeybindButton.Size = UDim2.new(0, 100, 0, 30)
     KeybindButton.BackgroundColor3 = Colors.Secondary
     KeybindButton.BorderSizePixel = 0
     KeybindButton.Text = config.Default or "None"
     KeybindButton.TextColor3 = Colors.Text
-    KeybindButton.TextSize = 13
+    KeybindButton.TextSize = 14
     KeybindButton.Font = Enum.Font.Gotham
     KeybindButton.Parent = KeybindFrame
     
@@ -1297,7 +1325,7 @@ function Spectrum:CreateKeybind(tab, config)
         
         local connection
         connection = UserInputService.InputBegan:Connect(function(input, gameProcessed)
-            if Binding then
+            if Binding and not gameProcessed then
                 if input.KeyCode ~= Enum.KeyCode.Unknown then
                     CurrentKey = input.KeyCode.Name
                     KeybindButton.Text = CurrentKey
@@ -1305,7 +1333,7 @@ function Spectrum:CreateKeybind(tab, config)
                     connection:Disconnect()
                     
                     if config.Callback then
-                        config.Callback(CurrentKey)
+                        task.spawn(config.Callback, CurrentKey)
                     end
                 end
             end
@@ -1313,14 +1341,21 @@ function Spectrum:CreateKeybind(tab, config)
     end)
     
     if config.Callback then
-        UserInputService.InputBegan:Connect(function(input, gameProcessed)
+        local keybindConnection
+        keybindConnection = UserInputService.InputBegan:Connect(function(input, gameProcessed)
             if not gameProcessed and input.KeyCode.Name == CurrentKey then
-                config.Callback(CurrentKey)
+                task.spawn(config.Callback, CurrentKey)
+            end
+        end)
+        
+        KeybindFrame.Destroying:Connect(function()
+            if keybindConnection then
+                keybindConnection:Disconnect()
             end
         end)
     end
     
-    return {
+    local KeybindObj = {
         Set = function(key)
             CurrentKey = key
             KeybindButton.Text = key
@@ -1329,27 +1364,31 @@ function Spectrum:CreateKeybind(tab, config)
             return CurrentKey
         end
     }
+    
+    KeybindFrame:SetAttribute("KeybindObject", KeybindObj)
+    
+    return KeybindObj
 end
 
 function Spectrum:CreateColorPicker(tab, config)
-    local ColorFrame = CreateFrame(tab.Content, config.Name or "ColorPicker", UDim2.new(1, -10, 0, 40), nil, 6)
+    local ColorFrame = CreateFrame(tab.Content, config.Name or "ColorPicker", UDim2.new(1, 0, 0, 45), nil, 6)
     ColorFrame.BackgroundColor3 = Colors.Button
     
     local ColorLabel = Instance.new("TextLabel")
-    ColorLabel.Position = UDim2.new(0, 10, 0, 0)
-    ColorLabel.Size = UDim2.new(1, -60, 1, 0)
+    ColorLabel.Position = UDim2.new(0, 15, 0, 0)
+    ColorLabel.Size = UDim2.new(1, -65, 1, 0)
     ColorLabel.BackgroundTransparency = 1
     ColorLabel.Text = config.Text or "Color Picker"
     ColorLabel.TextColor3 = Colors.Text
-    ColorLabel.TextSize = 14
+    ColorLabel.TextSize = 15
     ColorLabel.Font = Enum.Font.Gotham
     ColorLabel.TextXAlignment = Enum.TextXAlignment.Left
     ColorLabel.Parent = ColorFrame
     
     local ColorDisplay = Instance.new("TextButton")
     ColorDisplay.Name = "ColorDisplay"
-    ColorDisplay.Position = UDim2.new(1, -45, 0.5, -12.5)
-    ColorDisplay.Size = UDim2.new(0, 35, 0, 25)
+    ColorDisplay.Position = UDim2.new(1, -50, 0.5, -15)
+    ColorDisplay.Size = UDim2.new(0, 40, 0, 30)
     ColorDisplay.BackgroundColor3 = config.Default or Color3.fromRGB(255, 255, 255)
     ColorDisplay.BorderSizePixel = 0
     ColorDisplay.Text = ""
@@ -1368,51 +1407,56 @@ function Spectrum:CreateColorPicker(tab, config)
     
     ColorDisplay.MouseButton1Click:Connect(function()
         if config.Callback then
-            config.Callback(CurrentColor)
+            task.spawn(config.Callback, CurrentColor)
         end
     end)
     
-    return {
+    local ColorPickerObj = {
         Set = function(color)
             CurrentColor = color
             ColorDisplay.BackgroundColor3 = color
             if config.Callback then
-                config.Callback(color)
+                task.spawn(config.Callback, color)
             end
         end,
         Get = function()
             return CurrentColor
         end
     }
+    
+    ColorFrame:SetAttribute("ColorPickerObject", ColorPickerObj)
+    
+    return ColorPickerObj
 end
 
 function Spectrum:CreateParagraph(tab, config)
-    local ParagraphFrame = CreateFrame(tab.Content, "Paragraph", UDim2.new(1, -10, 0, 0), nil, 6)
+    local ParagraphFrame = CreateFrame(tab.Content, "Paragraph", UDim2.new(1, 0, 0, 0), nil, 6)
     ParagraphFrame.BackgroundColor3 = Colors.Button
     ParagraphFrame.AutomaticSize = Enum.AutomaticSize.Y
     
     local TitleLabel
     if config.Title then
         TitleLabel = Instance.new("TextLabel")
-        TitleLabel.Position = UDim2.new(0, 10, 0, 8)
-        TitleLabel.Size = UDim2.new(1, -20, 0, 20)
+        TitleLabel.Position = UDim2.new(0, 15, 0, 12)
+        TitleLabel.Size = UDim2.new(1, -30, 0, 24)
         TitleLabel.BackgroundTransparency = 1
         TitleLabel.Text = config.Title
         TitleLabel.TextColor3 = Colors.Text
-        TitleLabel.TextSize = 14
+        TitleLabel.TextSize = 16
         TitleLabel.Font = Enum.Font.GothamBold
         TitleLabel.TextXAlignment = Enum.TextXAlignment.Left
         TitleLabel.TextYAlignment = Enum.TextYAlignment.Top
+        TitleLabel.TextWrapped = true
         TitleLabel.Parent = ParagraphFrame
     end
     
     local ContentLabel = Instance.new("TextLabel")
-    ContentLabel.Position = UDim2.new(0, 10, 0, config.Title and 32 or 8)
-    ContentLabel.Size = UDim2.new(1, -20, 0, 0)
+    ContentLabel.Position = UDim2.new(0, 15, 0, config.Title and 42 or 12)
+    ContentLabel.Size = UDim2.new(1, -30, 0, 0)
     ContentLabel.BackgroundTransparency = 1
     ContentLabel.Text = config.Content or ""
     ContentLabel.TextColor3 = Colors.TextDim
-    ContentLabel.TextSize = 13
+    ContentLabel.TextSize = 14
     ContentLabel.Font = Enum.Font.Gotham
     ContentLabel.TextXAlignment = Enum.TextXAlignment.Left
     ContentLabel.TextYAlignment = Enum.TextYAlignment.Top
@@ -1421,10 +1465,10 @@ function Spectrum:CreateParagraph(tab, config)
     ContentLabel.Parent = ParagraphFrame
     
     local Padding = Instance.new("UIPadding")
-    Padding.PaddingBottom = UDim.new(0, 8)
+    Padding.PaddingBottom = UDim.new(0, 12)
     Padding.Parent = ParagraphFrame
     
-    return {
+    local ParagraphObj = {
         SetTitle = function(text)
             if TitleLabel then
                 TitleLabel.Text = text
@@ -1442,13 +1486,18 @@ function Spectrum:CreateParagraph(tab, config)
             end
         end
     }
+    
+    ParagraphFrame:SetAttribute("ParagraphObject", ParagraphObj)
+    
+    return ParagraphObj
 end
 
 function Spectrum:CreateDivider(tab)
     local Divider = Instance.new("Frame")
     Divider.Name = "Divider"
-    Divider.Size = UDim2.new(1, -10, 0, 1)
+    Divider.Size = UDim2.new(1, 0, 0, 1)
     Divider.BackgroundColor3 = Colors.Border
+    Divider.BackgroundTransparency = 0.5
     Divider.BorderSizePixel = 0
     Divider.Parent = tab.Content
     
@@ -1458,27 +1507,31 @@ end
 function Spectrum:CreateLabel(tab, text)
     local Label = Instance.new("TextLabel")
     Label.Name = "Label"
-    Label.Size = UDim2.new(1, -10, 0, 25)
+    Label.Size = UDim2.new(1, 0, 0, 30)
     Label.BackgroundTransparency = 1
     Label.Text = text or "Label"
     Label.TextColor3 = Colors.Text
-    Label.TextSize = 14
+    Label.TextSize = 15
     Label.Font = Enum.Font.Gotham
     Label.TextXAlignment = Enum.TextXAlignment.Left
     Label.Parent = tab.Content
     
-    return {
+    local LabelObj = {
         Set = function(newText)
             Label.Text = newText
         end
     }
+    
+    Label:SetAttribute("LabelObject", LabelObj)
+    
+    return LabelObj
 end
 
 function Spectrum:CreateUIToggle(config)
     local UIToggle = Instance.new("TextButton")
     UIToggle.Name = "UIToggle"
     UIToggle.Size = UDim2.new(0, 60, 0, 60)
-    UIToggle.Position = config.Position or UDim2.new(0, 10, 0.5, -30)
+    UIToggle.Position = config.Position or UDim2.new(0, 20, 0.5, -30)
     UIToggle.BackgroundColor3 = Colors.Background
     UIToggle.BorderSizePixel = 0
     UIToggle.Text = ""
@@ -1505,7 +1558,7 @@ function Spectrum:CreateUIToggle(config)
     local clickStart = 0
     
     UIToggle.InputBegan:Connect(function(input)
-        if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+        if input.UserInputType == Enum.UserInputType.MouseButton1 then
             clickStart = tick()
             dragStart = input.Position
             startPos = UIToggle.Position
@@ -1522,7 +1575,7 @@ function Spectrum:CreateUIToggle(config)
                         Tween(UIToggle, {Size = targetSize})
                         
                         if config.Callback then
-                            config.Callback(Visible)
+                            task.spawn(config.Callback, Visible)
                         end
                     end
                     
@@ -1533,7 +1586,7 @@ function Spectrum:CreateUIToggle(config)
     end)
     
     UIToggle.InputChanged:Connect(function(input)
-        if input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch then
+        if input.UserInputType == Enum.UserInputType.MouseMovement then
             dragInput = input
         end
     end)
