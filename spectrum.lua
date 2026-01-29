@@ -1,13 +1,6 @@
---[[
-    BlackUI Library v1.0
-    Uma biblioteca moderna de UI com tema all black para executores externos
-    Suporta mobile e PC com componentes completos
-]]
+local Spectrum = {}
+Spectrum.__index = Spectrum
 
-local BlackUI = {}
-BlackUI.__index = BlackUI
-
--- Serviços
 local Players = game:GetService("Players")
 local TweenService = game:GetService("TweenService")
 local UserInputService = game:GetService("UserInputService")
@@ -17,7 +10,6 @@ local CoreGui = game:GetService("CoreGui")
 local Player = Players.LocalPlayer
 local Mouse = Player:GetMouse()
 
--- Configurações de Cores
 local Colors = {
     Background = Color3.fromRGB(0, 0, 0),
     Secondary = Color3.fromRGB(0, 0, 0),
@@ -31,7 +23,6 @@ local Colors = {
     ButtonHover = Color3.fromRGB(20, 20, 20)
 }
 
--- Função de Tween
 local function Tween(instance, properties, duration)
     local tweenInfo = TweenInfo.new(duration or 0.2, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
     local tween = TweenService:Create(instance, tweenInfo, properties)
@@ -39,9 +30,7 @@ local function Tween(instance, properties, duration)
     return tween
 end
 
--- Função para criar ícones Lucide
 local LucideIcons = {
-    -- Interface & Navigation
     ["home"] = "rbxassetid://10723434711",
     ["menu"] = "rbxassetid://10723425537",
     ["x"] = "rbxassetid://10747384394",
@@ -50,30 +39,21 @@ local LucideIcons = {
     ["cog"] = "rbxassetid://10734950309",
     ["layout-dashboard"] = "rbxassetid://10723407389",
     ["grid"] = "rbxassetid://10723407389",
-    
-    -- User & People
     ["user"] = "rbxassetid://10734896829",
     ["users"] = "rbxassetid://10747373176",
-    
-    -- Actions
     ["plus"] = "rbxassetid://10747373176",
     ["check"] = "rbxassetid://10709761530",
     ["circle"] = "rbxassetid://10709761530",
-    
-    -- View
     ["eye"] = "rbxassetid://10747372992",
     ["eye-off"] = "rbxassetid://10747372992",
-    
-    -- Navigation
     ["navigation"] = "rbxassetid://10723434711",
     ["compass"] = "rbxassetid://10723434711",
     ["map"] = "rbxassetid://10723434711",
-    
-    -- Others
     ["shield"] = "rbxassetid://10723434711",
     ["star"] = "rbxassetid://10734896829",
     ["heart"] = "rbxassetid://10734896829",
     ["flag"] = "rbxassetid://10723434711",
+    ["pointer"] = "rbxassetid://10734896682",
 }
 
 local function CreateIcon(parent, iconName, size)
@@ -81,7 +61,7 @@ local function CreateIcon(parent, iconName, size)
     icon.Name = "Icon"
     icon.Size = UDim2.new(0, size or 20, 0, size or 20)
     icon.BackgroundTransparency = 1
-    icon.Image = LucideIcons[iconName] or iconName or "" -- Suporta tanto nomes quanto IDs diretos
+    icon.Image = LucideIcons[iconName] or iconName or ""
     icon.ImageColor3 = Colors.Text
     icon.ScaleType = Enum.ScaleType.Fit
     icon.Parent = parent
@@ -89,7 +69,6 @@ local function CreateIcon(parent, iconName, size)
     return icon
 end
 
--- Função para criar elementos com cantos quadrados e bordas
 local function CreateFrame(parent, name, size, position)
     local frame = Instance.new("Frame")
     frame.Name = name
@@ -108,24 +87,20 @@ local function CreateFrame(parent, name, size, position)
     return frame
 end
 
--- Criar UI Principal
-function BlackUI:CreateWindow(config)
-    local self = setmetatable({}, BlackUI)
+function Spectrum:CreateWindow(config)
+    local self = setmetatable({}, Spectrum)
     
-    -- Configurações
-    self.Title = config.Title or "BlackUI"
-    self.Author = config.Author or "Unknown"
+    self.Title = config.Title or "Spectrum"
+    self.Author = config.Author or "gt"
     self.Icon = config.Icon or nil
     self.Tabs = {}
     self.CurrentTab = nil
     
-    -- ScreenGui
     self.ScreenGui = Instance.new("ScreenGui")
-    self.ScreenGui.Name = "BlackUI_" .. math.random(1000, 9999)
+    self.ScreenGui.Name = "Spectrum_" .. math.random(1000, 9999)
     self.ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
     self.ScreenGui.ResetOnSpawn = false
     
-    -- Proteção contra detecção
     if gethui then
         self.ScreenGui.Parent = gethui()
     elseif syn and syn.protect_gui then
@@ -135,11 +110,9 @@ function BlackUI:CreateWindow(config)
         self.ScreenGui.Parent = CoreGui
     end
     
-    -- Main Container - Tamanho otimizado para mobile
     self.Main = CreateFrame(self.ScreenGui, "Main", UDim2.new(0, 480, 0, 360), UDim2.new(0.5, -240, 0.5, -180))
     self.Main.BackgroundColor3 = Colors.Background
     
-    -- Drag functionality
     local dragging, dragInput, dragStart, startPos
     
     self.Main.InputBegan:Connect(function(input)
@@ -169,17 +142,14 @@ function BlackUI:CreateWindow(config)
         end
     end)
     
-    -- Header
     local Header = CreateFrame(self.Main, "Header", UDim2.new(1, 0, 0, 50), UDim2.new(0, 0, 0, 0))
     Header.BackgroundColor3 = Colors.Background
     
-    -- Logo/Icon
     if self.Icon then
         local IconFrame = CreateIcon(Header, self.Icon, 30)
         IconFrame.Position = UDim2.new(0, 10, 0.5, -15)
     end
     
-    -- Title
     local TitleLabel = Instance.new("TextLabel")
     TitleLabel.Name = "Title"
     TitleLabel.Position = UDim2.new(0, self.Icon and 50 or 10, 0, 5)
@@ -192,7 +162,6 @@ function BlackUI:CreateWindow(config)
     TitleLabel.TextXAlignment = Enum.TextXAlignment.Left
     TitleLabel.Parent = Header
     
-    -- Author
     local AuthorLabel = Instance.new("TextLabel")
     AuthorLabel.Name = "Author"
     AuthorLabel.Position = UDim2.new(0, self.Icon and 50 or 10, 0, 28)
@@ -205,7 +174,6 @@ function BlackUI:CreateWindow(config)
     AuthorLabel.TextXAlignment = Enum.TextXAlignment.Left
     AuthorLabel.Parent = Header
     
-    -- Close Button
     local CloseBtn = Instance.new("TextButton")
     CloseBtn.Name = "Close"
     CloseBtn.Size = UDim2.new(0, 40, 0, 40)
@@ -235,7 +203,6 @@ function BlackUI:CreateWindow(config)
         Tween(CloseBtn, {BackgroundColor3 = Colors.Secondary})
     end)
     
-    -- Tab Container
     self.TabContainer = CreateFrame(self.Main, "TabContainer", UDim2.new(0, 150, 1, -60), UDim2.new(0, 5, 0, 55))
     
     local TabList = Instance.new("UIListLayout")
@@ -243,20 +210,17 @@ function BlackUI:CreateWindow(config)
     TabList.Padding = UDim.new(0, 5)
     TabList.Parent = self.TabContainer
     
-    -- Content Container
     self.ContentContainer = CreateFrame(self.Main, "ContentContainer", UDim2.new(1, -165, 1, -60), UDim2.new(0, 160, 0, 55))
     
     return self
 end
 
--- Criar Tab
-function BlackUI:CreateTab(config)
+function Spectrum:CreateTab(config)
     local Tab = {}
     Tab.Name = config.Name or "Tab"
     Tab.Icon = config.Icon or nil
     Tab.Elements = {}
     
-    -- Tab Button
     Tab.Button = Instance.new("TextButton")
     Tab.Button.Name = Tab.Name
     Tab.Button.Size = UDim2.new(1, 0, 0, 40)
@@ -270,13 +234,11 @@ function BlackUI:CreateTab(config)
     TabBorder.Thickness = 1
     TabBorder.Parent = Tab.Button
     
-    -- Icon
     if Tab.Icon then
         local TabIcon = CreateIcon(Tab.Button, Tab.Icon, 20)
         TabIcon.Position = UDim2.new(0, 10, 0.5, -10)
     end
     
-    -- Label
     local TabLabel = Instance.new("TextLabel")
     TabLabel.Position = UDim2.new(0, Tab.Icon and 40 or 10, 0, 0)
     TabLabel.Size = UDim2.new(1, Tab.Icon and -40 or -10, 1, 0)
@@ -288,7 +250,6 @@ function BlackUI:CreateTab(config)
     TabLabel.TextXAlignment = Enum.TextXAlignment.Left
     TabLabel.Parent = Tab.Button
     
-    -- Content Frame
     Tab.Content = Instance.new("ScrollingFrame")
     Tab.Content.Name = Tab.Name .. "Content"
     Tab.Content.Size = UDim2.new(1, 0, 1, 0)
@@ -314,7 +275,6 @@ function BlackUI:CreateTab(config)
     ContentPadding.PaddingRight = UDim.new(0, 16)
     ContentPadding.Parent = Tab.Content
     
-    -- Tab Click
     Tab.Button.MouseButton1Click:Connect(function()
         self:SelectTab(Tab)
     end)
@@ -333,7 +293,6 @@ function BlackUI:CreateTab(config)
     
     table.insert(self.Tabs, Tab)
     
-    -- Select first tab
     if #self.Tabs == 1 then
         self:SelectTab(Tab)
     end
@@ -341,8 +300,7 @@ function BlackUI:CreateTab(config)
     return Tab
 end
 
--- Selecionar Tab
-function BlackUI:SelectTab(tab)
+function Spectrum:SelectTab(tab)
     for _, t in pairs(self.Tabs) do
         t.Content.Visible = false
         Tween(t.Button, {BackgroundColor3 = Colors.Secondary})
@@ -355,23 +313,33 @@ function BlackUI:SelectTab(tab)
     self.CurrentTab = tab
 end
 
--- Criar Botão
-function BlackUI:CreateButton(tab, config)
+function Spectrum:CreateButton(tab, config)
     local Button = Instance.new("TextButton")
     Button.Name = config.Name or "Button"
     Button.Size = UDim2.new(1, -10, 0, 40)
     Button.BackgroundColor3 = Colors.Button
     Button.BorderSizePixel = 0
-    Button.Text = config.Text or "Button"
-    Button.TextColor3 = Colors.Text
-    Button.TextSize = 14
-    Button.Font = Enum.Font.Gotham
+    Button.Text = ""
     Button.Parent = tab.Content
     
     local ButtonBorder = Instance.new("UIStroke")
     ButtonBorder.Color = Colors.Border
     ButtonBorder.Thickness = 1
     ButtonBorder.Parent = Button
+    
+    local ButtonLabel = Instance.new("TextLabel")
+    ButtonLabel.Position = UDim2.new(0, 10, 0, 0)
+    ButtonLabel.Size = UDim2.new(1, -50, 1, 0)
+    ButtonLabel.BackgroundTransparency = 1
+    ButtonLabel.Text = config.Text or "Button"
+    ButtonLabel.TextColor3 = Colors.Text
+    ButtonLabel.TextSize = 14
+    ButtonLabel.Font = Enum.Font.Gotham
+    ButtonLabel.TextXAlignment = Enum.TextXAlignment.Left
+    ButtonLabel.Parent = Button
+    
+    local ClickIcon = CreateIcon(Button, "pointer", 18)
+    ClickIcon.Position = UDim2.new(1, -28, 0.5, -9)
     
     Button.MouseButton1Click:Connect(function()
         if config.Callback then
@@ -390,8 +358,7 @@ function BlackUI:CreateButton(tab, config)
     return Button
 end
 
--- Criar Toggle
-function BlackUI:CreateToggle(tab, config)
+function Spectrum:CreateToggle(tab, config)
     local ToggleFrame = CreateFrame(tab.Content, config.Name or "Toggle", UDim2.new(1, -10, 0, 40))
     ToggleFrame.BackgroundColor3 = Colors.Button
     
@@ -459,8 +426,7 @@ function BlackUI:CreateToggle(tab, config)
     }
 end
 
--- Criar Slider com Input
-function BlackUI:CreateSlider(tab, config)
+function Spectrum:CreateSlider(tab, config)
     local SliderFrame = CreateFrame(tab.Content, config.Name or "Slider", UDim2.new(1, -10, 0, 70))
     SliderFrame.BackgroundColor3 = Colors.Button
     
@@ -475,7 +441,6 @@ function BlackUI:CreateSlider(tab, config)
     SliderLabel.TextXAlignment = Enum.TextXAlignment.Left
     SliderLabel.Parent = SliderFrame
     
-    -- Input Box (no topo)
     local InputBox = Instance.new("TextBox")
     InputBox.Name = "InputBox"
     InputBox.Position = UDim2.new(1, -60, 0, 5)
@@ -494,11 +459,9 @@ function BlackUI:CreateSlider(tab, config)
     InputBorder.Thickness = 1
     InputBorder.Parent = InputBox
     
-    -- Slider Track
     local SliderTrack = CreateFrame(SliderFrame, "Track", UDim2.new(1, -20, 0, 6), UDim2.new(0, 10, 0, 38))
     SliderTrack.BackgroundColor3 = Colors.Secondary
     
-    -- Slider Fill
     local SliderFill = Instance.new("Frame")
     SliderFill.Name = "Fill"
     SliderFill.Size = UDim2.new(0, 0, 1, 0)
@@ -506,7 +469,6 @@ function BlackUI:CreateSlider(tab, config)
     SliderFill.BorderSizePixel = 0
     SliderFill.Parent = SliderTrack
     
-    -- Value Label
     local ValueLabel = Instance.new("TextLabel")
     ValueLabel.Position = UDim2.new(0, 10, 0, 50)
     ValueLabel.Size = UDim2.new(1, -20, 0, 15)
@@ -540,7 +502,6 @@ function BlackUI:CreateSlider(tab, config)
         end
     end
     
-    -- Input Box handling
     InputBox.FocusLost:Connect(function()
         local inputValue = tonumber(InputBox.Text)
         if inputValue then
@@ -550,7 +511,6 @@ function BlackUI:CreateSlider(tab, config)
         end
     end)
     
-    -- Slider dragging
     local dragging = false
     
     SliderTrack.InputBegan:Connect(function(input)
@@ -598,8 +558,7 @@ function BlackUI:CreateSlider(tab, config)
     }
 end
 
--- Criar Dropdown
-function BlackUI:CreateDropdown(tab, config)
+function Spectrum:CreateDropdown(tab, config)
     local DropdownFrame = CreateFrame(tab.Content, config.Name or "Dropdown", UDim2.new(1, -10, 0, 40))
     DropdownFrame.BackgroundColor3 = Colors.Button
     DropdownFrame.ClipsDescendants = true
@@ -710,8 +669,7 @@ function BlackUI:CreateDropdown(tab, config)
     }
 end
 
--- Criar Parágrafo
-function BlackUI:CreateParagraph(tab, config)
+function Spectrum:CreateParagraph(tab, config)
     local ParagraphFrame = CreateFrame(tab.Content, "Paragraph", UDim2.new(1, -10, 0, 0))
     ParagraphFrame.BackgroundColor3 = Colors.Button
     ParagraphFrame.AutomaticSize = Enum.AutomaticSize.Y
@@ -751,8 +709,7 @@ function BlackUI:CreateParagraph(tab, config)
     return ParagraphFrame
 end
 
--- Criar Divider
-function BlackUI:CreateDivider(tab)
+function Spectrum:CreateDivider(tab)
     local Divider = Instance.new("Frame")
     Divider.Name = "Divider"
     Divider.Size = UDim2.new(1, -10, 0, 1)
@@ -763,8 +720,7 @@ function BlackUI:CreateDivider(tab)
     return Divider
 end
 
--- Criar Label
-function BlackUI:CreateLabel(tab, text)
+function Spectrum:CreateLabel(tab, text)
     local Label = Instance.new("TextLabel")
     Label.Name = "Label"
     Label.Size = UDim2.new(1, -10, 0, 25)
@@ -779,62 +735,96 @@ function BlackUI:CreateLabel(tab, text)
     return Label
 end
 
--- Criar Toggle UI (botão flutuante arredondado)
-function BlackUI:CreateUIToggle(config)
+function Spectrum:CreateUIToggle(config)
     local UIToggle = Instance.new("TextButton")
     UIToggle.Name = "UIToggle"
-    UIToggle.Size = UDim2.new(0, 50, 0, 50)
-    UIToggle.Position = config.Position or UDim2.new(0, 10, 0.5, -25)
+    UIToggle.Size = UDim2.new(0, 60, 0, 60)
+    UIToggle.Position = config.Position or UDim2.new(0, 10, 0.5, -30)
     UIToggle.BackgroundColor3 = Colors.Background
     UIToggle.BorderSizePixel = 0
     UIToggle.Text = ""
     UIToggle.ZIndex = 1000
     UIToggle.Parent = self.ScreenGui
     
-    -- Cantos arredondados
     local Corner = Instance.new("UICorner")
-    Corner.CornerRadius = UDim.new(1, 0)
+    Corner.CornerRadius = UDim.new(0, 12)
     Corner.Parent = UIToggle
     
-    -- Borda branca
     local Border = Instance.new("UIStroke")
     Border.Color = Colors.Border
     Border.Thickness = 2
     Border.Parent = UIToggle
     
-    -- Ícone
     if config.Icon then
-        local Icon = CreateIcon(UIToggle, config.Icon, 30)
-        Icon.Position = UDim2.new(0.5, -15, 0.5, -15)
+        local Icon = CreateIcon(UIToggle, config.Icon, 35)
+        Icon.Position = UDim2.new(0.5, -17.5, 0.5, -17.5)
     end
     
-    -- Funcionalidade
     local Visible = true
-    UIToggle.MouseButton1Click:Connect(function()
-        Visible = not Visible
-        self.Main.Visible = Visible
-        
-        -- Animação do botão
-        local targetSize = Visible and UDim2.new(0, 50, 0, 50) or UDim2.new(0, 45, 0, 45)
-        Tween(UIToggle, {Size = targetSize})
-        
-        if config.Callback then
-            config.Callback(Visible)
+    
+    local dragging, dragInput, dragStart, startPos
+    
+    UIToggle.InputBegan:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+            local isClick = true
+            dragStart = input.Position
+            startPos = UIToggle.Position
+            
+            wait(0.1)
+            
+            if input.UserInputState ~= Enum.UserInputState.End then
+                dragging = true
+                isClick = false
+            end
+            
+            input.Changed:Connect(function()
+                if input.UserInputState == Enum.UserInputState.End then
+                    dragging = false
+                    
+                    if isClick then
+                        Visible = not Visible
+                        self.Main.Visible = Visible
+                        
+                        local targetSize = Visible and UDim2.new(0, 60, 0, 60) or UDim2.new(0, 55, 0, 55)
+                        Tween(UIToggle, {Size = targetSize})
+                        
+                        if config.Callback then
+                            config.Callback(Visible)
+                        end
+                    end
+                end
+            end)
         end
     end)
     
-    -- Efeito hover
+    UIToggle.InputChanged:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch then
+            dragInput = input
+        end
+    end)
+    
+    UserInputService.InputChanged:Connect(function(input)
+        if input == dragInput and dragging then
+            local delta = input.Position - dragStart
+            UIToggle.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
+        end
+    end)
+    
     UIToggle.MouseEnter:Connect(function()
-        Tween(UIToggle, {Size = UDim2.new(0, 55, 0, 55)})
-        Tween(Border, {Thickness = 3})
+        if not dragging then
+            Tween(UIToggle, {Size = UDim2.new(0, 65, 0, 65)})
+            Tween(Border, {Thickness = 3})
+        end
     end)
     
     UIToggle.MouseLeave:Connect(function()
-        Tween(UIToggle, {Size = UDim2.new(0, 50, 0, 50)})
-        Tween(Border, {Thickness = 2})
+        if not dragging then
+            Tween(UIToggle, {Size = UDim2.new(0, 60, 0, 60)})
+            Tween(Border, {Thickness = 2})
+        end
     end)
     
     return UIToggle
 end
 
-return BlackUI
+return Spectrum
