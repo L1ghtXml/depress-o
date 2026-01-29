@@ -54,7 +54,7 @@ Uma biblioteca moderna e completa de UI em Lua com tema **all black**, desenvolv
 
 ### Método 1: LoadString (Recomendado)
 ```lua
-local BlackUI = loadstring(game:HttpGet("URL_DA_SUA_LIBRARY"))()
+local BlackUI = loadstring(game:HttpGet("https://raw.githubusercontent.com/L1ghtXml/depress-o/refs/heads/main/spectrum.lua"))()
 ```
 
 ### Método 2: Arquivo Local
