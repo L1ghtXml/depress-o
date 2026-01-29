@@ -761,27 +761,21 @@ function Spectrum:CreateUIToggle(config)
     end
     
     local Visible = true
-    
-    local dragging, dragInput, dragStart, startPos
+    local dragging = false
+    local dragInput, dragStart, startPos
+    local clickStart = 0
     
     UIToggle.InputBegan:Connect(function(input)
         if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-            local isClick = true
+            clickStart = tick()
             dragStart = input.Position
             startPos = UIToggle.Position
             
-            wait(0.1)
-            
-            if input.UserInputState ~= Enum.UserInputState.End then
-                dragging = true
-                isClick = false
-            end
-            
             input.Changed:Connect(function()
                 if input.UserInputState == Enum.UserInputState.End then
-                    dragging = false
+                    local clickDuration = tick() - clickStart
                     
-                    if isClick then
+                    if not dragging and clickDuration < 0.2 then
                         Visible = not Visible
                         self.Main.Visible = Visible
                         
@@ -792,6 +786,8 @@ function Spectrum:CreateUIToggle(config)
                             config.Callback(Visible)
                         end
                     end
+                    
+                    dragging = false
                 end
             end)
         end
@@ -804,24 +800,23 @@ function Spectrum:CreateUIToggle(config)
     end)
     
     UserInputService.InputChanged:Connect(function(input)
-        if input == dragInput and dragging then
+        if input == dragInput and dragStart then
             local delta = input.Position - dragStart
-            UIToggle.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
+            if delta.Magnitude > 5 then
+                dragging = true
+                UIToggle.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
+            end
         end
     end)
     
     UIToggle.MouseEnter:Connect(function()
-        if not dragging then
-            Tween(UIToggle, {Size = UDim2.new(0, 65, 0, 65)})
-            Tween(Border, {Thickness = 3})
-        end
+        Tween(UIToggle, {Size = UDim2.new(0, 65, 0, 65)})
+        Tween(Border, {Thickness = 3})
     end)
     
     UIToggle.MouseLeave:Connect(function()
-        if not dragging then
-            Tween(UIToggle, {Size = UDim2.new(0, 60, 0, 60)})
-            Tween(Border, {Thickness = 2})
-        end
+        Tween(UIToggle, {Size = UDim2.new(0, 60, 0, 60)})
+        Tween(Border, {Thickness = 2})
     end)
     
     return UIToggle
