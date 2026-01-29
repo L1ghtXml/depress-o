@@ -1,10 +1,10 @@
-# BlackUI Library 🖤
+# Spectrum Library
 
 Uma biblioteca moderna e completa de UI em Lua com tema **all black**, desenvolvida especialmente para **executores externos** de Roblox.
 
-## ✨ Características
+##  Características
 
-- 🎨 **Tema All Black** - Design moderno e elegante
+-  **Tema All Black** - Design moderno e elegante
 - 📱 **Suporte Mobile** - Funciona perfeitamente em dispositivos móveis
 - 🔲 **Cantos Quadrados** - Estilo clean e profissional
 - 🎯 **Componentes Completos** - Todos os elementos que você precisa
