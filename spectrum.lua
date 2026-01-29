@@ -9,7 +9,6 @@ local CoreGui = game:GetService("CoreGui")
 local HttpService = game:GetService("HttpService")
 
 local Player = Players.LocalPlayer
-local Mouse = Player:GetMouse()
 
 local Colors = {
     Background = Color3.fromRGB(0, 0, 0),
@@ -18,11 +17,17 @@ local Colors = {
     Accent = Color3.fromRGB(255, 255, 255),
     Text = Color3.fromRGB(255, 255, 255),
     TextDim = Color3.fromRGB(180, 180, 180),
-    Toggle = Color3.fromRGB(255, 255, 255),
+    ToggleEnabled = Color3.fromRGB(0, 255, 0),
+    ToggleDisabled = Color3.fromRGB(255, 0, 0),
     Slider = Color3.fromRGB(255, 255, 255),
     Button = Color3.fromRGB(0, 0, 0),
     ButtonHover = Color3.fromRGB(20, 20, 20),
-    InputBg = Color3.fromRGB(10, 10, 10)
+    InputBg = Color3.fromRGB(10, 10, 10),
+    NotifyBg = Color3.fromRGB(15, 15, 15),
+    Success = Color3.fromRGB(0, 255, 0),
+    Warning = Color3.fromRGB(255, 165, 0),
+    Error = Color3.fromRGB(255, 0, 0),
+    Info = Color3.fromRGB(100, 150, 255)
 }
 
 local function Tween(instance, properties, duration)
@@ -33,40 +38,293 @@ local function Tween(instance, properties, duration)
 end
 
 local LucideIcons = {
-    ["home"] = "rbxassetid://10723434711",
-    ["menu"] = "rbxassetid://10723425537",
-    ["x"] = "rbxassetid://10747384394",
-    ["search"] = "rbxassetid://10734898355",
-    ["settings"] = "rbxassetid://10734950309",
-    ["cog"] = "rbxassetid://10734950309",
-    ["layout-dashboard"] = "rbxassetid://10723407389",
-    ["grid"] = "rbxassetid://10723407389",
-    ["user"] = "rbxassetid://10734896829",
-    ["users"] = "rbxassetid://10747373176",
-    ["plus"] = "rbxassetid://10747373176",
-    ["check"] = "rbxassetid://10709761530",
-    ["circle"] = "rbxassetid://10709761530",
-    ["eye"] = "rbxassetid://10747372992",
-    ["eye-off"] = "rbxassetid://10747372992",
-    ["navigation"] = "rbxassetid://10723434711",
-    ["compass"] = "rbxassetid://10723434711",
-    ["map"] = "rbxassetid://10723434711",
-    ["shield"] = "rbxassetid://10723434711",
-    ["star"] = "rbxassetid://10734896829",
-    ["heart"] = "rbxassetid://10734896829",
-    ["flag"] = "rbxassetid://10723434711",
-    ["pointer"] = "rbxassetid://10734896682",
-    ["file"] = "rbxassetid://10723369639",
-    ["folder"] = "rbxassetid://10723369639",
-    ["save"] = "rbxassetid://10734952273",
-    ["trash"] = "rbxassetid://10734896920",
-    ["edit"] = "rbxassetid://10734943156",
-    ["copy"] = "rbxassetid://10734896206",
-    ["clipboard"] = "rbxassetid://10734896206",
-    ["link"] = "rbxassetid://10734929777",
-    ["image"] = "rbxassetid://10723417387",
-    ["download"] = "rbxassetid://10734898592",
-    ["upload"] = "rbxassetid://10734896920",
+    ["alert-circle"] = "rbxassetid://10702825470",
+    ["alert-triangle"] = "rbxassetid://10702825991",
+    ["align-center"] = "rbxassetid://10702826378",
+    ["align-justify"] = "rbxassetid://10702826646",
+    ["align-left"] = "rbxassetid://10702826842",
+    ["align-right"] = "rbxassetid://10702827088",
+    ["anchor"] = "rbxassetid://10702827370",
+    ["aperture"] = "rbxassetid://10702827598",
+    ["archive"] = "rbxassetid://10702827814",
+    ["arrow-big-down"] = "rbxassetid://10702828053",
+    ["arrow-big-left"] = "rbxassetid://10702828281",
+    ["arrow-big-right"] = "rbxassetid://10702828497",
+    ["arrow-big-up"] = "rbxassetid://10702828779",
+    ["arrow-down"] = "rbxassetid://10702828992",
+    ["arrow-down-circle"] = "rbxassetid://10702829210",
+    ["arrow-down-left"] = "rbxassetid://10702829451",
+    ["arrow-down-right"] = "rbxassetid://10702829702",
+    ["arrow-left"] = "rbxassetid://10702830151",
+    ["arrow-left-circle"] = "rbxassetid://10702829920",
+    ["arrow-left-right"] = "rbxassetid://10702830424",
+    ["arrow-right"] = "rbxassetid://10702830644",
+    ["arrow-right-circle"] = "rbxassetid://10702830874",
+    ["arrow-up"] = "rbxassetid://10702831098",
+    ["arrow-up-circle"] = "rbxassetid://10702831348",
+    ["arrow-up-down"] = "rbxassetid://10702831603",
+    ["arrow-up-left"] = "rbxassetid://10702831861",
+    ["arrow-up-right"] = "rbxassetid://10702832119",
+    ["at-sign"] = "rbxassetid://10702832419",
+    ["award"] = "rbxassetid://10702832673",
+    ["axe"] = "rbxassetid://10702832929",
+    ["bar-chart"] = "rbxassetid://10702833156",
+    ["bar-chart-2"] = "rbxassetid://10702833472",
+    ["battery"] = "rbxassetid://10702833714",
+    ["battery-charging"] = "rbxassetid://10702833988",
+    ["bell"] = "rbxassetid://10702834243",
+    ["bell-off"] = "rbxassetid://10702834495",
+    ["bluetooth"] = "rbxassetid://10702834757",
+    ["bold"] = "rbxassetid://10702834993",
+    ["book"] = "rbxassetid://10702835215",
+    ["book-open"] = "rbxassetid://10702835468",
+    ["bookmark"] = "rbxassetid://10702835705",
+    ["box"] = "rbxassetid://10702835962",
+    ["briefcase"] = "rbxassetid://10702836195",
+    ["calendar"] = "rbxassetid://10702836415",
+    ["camera"] = "rbxassetid://10702836655",
+    ["camera-off"] = "rbxassetid://10702836885",
+    ["cast"] = "rbxassetid://10702837108",
+    ["check"] = "rbxassetid://10702837342",
+    ["check-circle"] = "rbxassetid://10702837595",
+    ["check-square"] = "rbxassetid://10702837856",
+    ["chevron-down"] = "rbxassetid://10702838130",
+    ["chevron-left"] = "rbxassetid://10702838385",
+    ["chevron-right"] = "rbxassetid://10702838625",
+    ["chevron-up"] = "rbxassetid://10702838869",
+    ["chevrons-down"] = "rbxassetid://10702839111",
+    ["chevrons-left"] = "rbxassetid://10702839367",
+    ["chevrons-right"] = "rbxassetid://10702839599",
+    ["chevrons-up"] = "rbxassetid://10702839851",
+    ["circle"] = "rbxassetid://10702840087",
+    ["clipboard"] = "rbxassetid://10702840298",
+    ["clock"] = "rbxassetid://10702840535",
+    ["cloud"] = "rbxassetid://10702840766",
+    ["cloud-drizzle"] = "rbxassetid://10702841000",
+    ["cloud-lightning"] = "rbxassetid://10702841252",
+    ["cloud-off"] = "rbxassetid://10702841488",
+    ["cloud-rain"] = "rbxassetid://10702841717",
+    ["cloud-snow"] = "rbxassetid://10702841936",
+    ["code"] = "rbxassetid://10702842174",
+    ["codepen"] = "rbxassetid://10702842427",
+    ["codesandbox"] = "rbxassetid://10702842656",
+    ["coffee"] = "rbxassetid://10702842903",
+    ["cog"] = "rbxassetid://10747373176",
+    ["columns"] = "rbxassetid://10702843151",
+    ["command"] = "rbxassetid://10702843383",
+    ["compass"] = "rbxassetid://10702843629",
+    ["copy"] = "rbxassetid://10702843874",
+    ["corner-down-left"] = "rbxassetid://10702844103",
+    ["corner-down-right"] = "rbxassetid://10702844350",
+    ["corner-left-down"] = "rbxassetid://10702844583",
+    ["corner-left-up"] = "rbxassetid://10702844823",
+    ["corner-right-down"] = "rbxassetid://10702845057",
+    ["corner-right-up"] = "rbxassetid://10702845304",
+    ["corner-up-left"] = "rbxassetid://10702845537",
+    ["corner-up-right"] = "rbxassetid://10702845782",
+    ["cpu"] = "rbxassetid://10702846027",
+    ["credit-card"] = "rbxassetid://10702846246",
+    ["crop"] = "rbxassetid://10702846479",
+    ["crosshair"] = "rbxassetid://10702846710",
+    ["database"] = "rbxassetid://10702846950",
+    ["delete"] = "rbxassetid://10702847178",
+    ["disc"] = "rbxassetid://10702847403",
+    ["dollar-sign"] = "rbxassetid://10702847636",
+    ["download"] = "rbxassetid://10702847864",
+    ["download-cloud"] = "rbxassetid://10702848098",
+    ["droplet"] = "rbxassetid://10702848311",
+    ["edit"] = "rbxassetid://10702848537",
+    ["edit-2"] = "rbxassetid://10702848771",
+    ["edit-3"] = "rbxassetid://10702849004",
+    ["external-link"] = "rbxassetid://10702849237",
+    ["eye"] = "rbxassetid://10702849473",
+    ["eye-off"] = "rbxassetid://10702849722",
+    ["facebook"] = "rbxassetid://10702849988",
+    ["fast-forward"] = "rbxassetid://10702850209",
+    ["feather"] = "rbxassetid://10702850452",
+    ["figma"] = "rbxassetid://10702850676",
+    ["file"] = "rbxassetid://10702850904",
+    ["file-minus"] = "rbxassetid://10702851148",
+    ["file-plus"] = "rbxassetid://10702851386",
+    ["file-text"] = "rbxassetid://10702851622",
+    ["film"] = "rbxassetid://10702851851",
+    ["filter"] = "rbxassetid://10702852090",
+    ["flag"] = "rbxassetid://10702852329",
+    ["folder"] = "rbxassetid://10702852566",
+    ["folder-minus"] = "rbxassetid://10702852798",
+    ["folder-plus"] = "rbxassetid://10702853037",
+    ["framer"] = "rbxassetid://10702853272",
+    ["frown"] = "rbxassetid://10702853499",
+    ["gift"] = "rbxassetid://10702853727",
+    ["git-branch"] = "rbxassetid://10702853963",
+    ["git-commit"] = "rbxassetid://10702854189",
+    ["git-merge"] = "rbxassetid://10702854426",
+    ["git-pull-request"] = "rbxassetid://10702854660",
+    ["github"] = "rbxassetid://10702854888",
+    ["gitlab"] = "rbxassetid://10702855119",
+    ["globe"] = "rbxassetid://10702855351",
+    ["grid"] = "rbxassetid://10702855580",
+    ["hard-drive"] = "rbxassetid://10702855811",
+    ["hash"] = "rbxassetid://10702856043",
+    ["headphones"] = "rbxassetid://10702856270",
+    ["heart"] = "rbxassetid://10702856502",
+    ["help-circle"] = "rbxassetid://10702856736",
+    ["hexagon"] = "rbxassetid://10702856962",
+    ["home"] = "rbxassetid://10702857195",
+    ["image"] = "rbxassetid://10702857430",
+    ["inbox"] = "rbxassetid://10702857657",
+    ["info"] = "rbxassetid://10702857879",
+    ["instagram"] = "rbxassetid://10702858107",
+    ["italic"] = "rbxassetid://10702858337",
+    ["key"] = "rbxassetid://10702858560",
+    ["layers"] = "rbxassetid://10702858792",
+    ["layout"] = "rbxassetid://10702859020",
+    ["life-buoy"] = "rbxassetid://10702859249",
+    ["link"] = "rbxassetid://10702859476",
+    ["link-2"] = "rbxassetid://10702859708",
+    ["linkedin"] = "rbxassetid://10702859941",
+    ["list"] = "rbxassetid://10702860171",
+    ["loader"] = "rbxassetid://10702860402",
+    ["lock"] = "rbxassetid://10702860636",
+    ["log-in"] = "rbxassetid://10702860861",
+    ["log-out"] = "rbxassetid://10702861091",
+    ["mail"] = "rbxassetid://10702861327",
+    ["map"] = "rbxassetid://10702861559",
+    ["map-pin"] = "rbxassetid://10702861785",
+    ["maximize"] = "rbxassetid://10702862008",
+    ["maximize-2"] = "rbxassetid://10702862236",
+    ["meh"] = "rbxassetid://10702862458",
+    ["menu"] = "rbxassetid://10702862684",
+    ["message-circle"] = "rbxassetid://10702862915",
+    ["message-square"] = "rbxassetid://10702863144",
+    ["mic"] = "rbxassetid://10702863365",
+    ["mic-off"] = "rbxassetid://10702863598",
+    ["minimize"] = "rbxassetid://10702863825",
+    ["minimize-2"] = "rbxassetid://10702864056",
+    ["minus"] = "rbxassetid://10702864286",
+    ["minus-circle"] = "rbxassetid://10702864522",
+    ["minus-square"] = "rbxassetid://10702864756",
+    ["monitor"] = "rbxassetid://10702864987",
+    ["moon"] = "rbxassetid://10702865214",
+    ["more-horizontal"] = "rbxassetid://10702865447",
+    ["more-vertical"] = "rbxassetid://10702865681",
+    ["mouse-pointer"] = "rbxassetid://10702865908",
+    ["move"] = "rbxassetid://10702866139",
+    ["music"] = "rbxassetid://10702866370",
+    ["navigation"] = "rbxassetid://10702866606",
+    ["navigation-2"] = "rbxassetid://10702866831",
+    ["octagon"] = "rbxassetid://10702867059",
+    ["package"] = "rbxassetid://10702867283",
+    ["paperclip"] = "rbxassetid://10702867515",
+    ["pause"] = "rbxassetid://10702867747",
+    ["pause-circle"] = "rbxassetid://10702867969",
+    ["pen-tool"] = "rbxassetid://10702868191",
+    ["percent"] = "rbxassetid://10702868426",
+    ["phone"] = "rbxassetid://10702868658",
+    ["phone-call"] = "rbxassetid://10702868883",
+    ["phone-forwarded"] = "rbxassetid://10702869110",
+    ["phone-incoming"] = "rbxassetid://10702869343",
+    ["phone-missed"] = "rbxassetid://10702869572",
+    ["phone-off"] = "rbxassetid://10702869806",
+    ["phone-outgoing"] = "rbxassetid://10702870038",
+    ["pie-chart"] = "rbxassetid://10702870265",
+    ["play"] = "rbxassetid://10702870495",
+    ["play-circle"] = "rbxassetid://10702870727",
+    ["plus"] = "rbxassetid://10702870958",
+    ["plus-circle"] = "rbxassetid://10702871188",
+    ["plus-square"] = "rbxassetid://10702871421",
+    ["pocket"] = "rbxassetid://10702871651",
+    ["pointer"] = "rbxassetid://10702871882",
+    ["power"] = "rbxassetid://10702872111",
+    ["printer"] = "rbxassetid://10702872337",
+    ["radio"] = "rbxassetid://10702872565",
+    ["refresh-ccw"] = "rbxassetid://10702872793",
+    ["refresh-cw"] = "rbxassetid://10702873022",
+    ["repeat"] = "rbxassetid://10702873254",
+    ["rewind"] = "rbxassetid://10702873485",
+    ["rotate-ccw"] = "rbxassetid://10702873715",
+    ["rotate-cw"] = "rbxassetid://10702873944",
+    ["rss"] = "rbxassetid://10702874174",
+    ["save"] = "rbxassetid://10702874402",
+    ["scissors"] = "rbxassetid://10702874635",
+    ["search"] = "rbxassetid://10702874862",
+    ["send"] = "rbxassetid://10702875089",
+    ["server"] = "rbxassetid://10702875323",
+    ["settings"] = "rbxassetid://10747373176",
+    ["share"] = "rbxassetid://10702875554",
+    ["share-2"] = "rbxassetid://10702875782",
+    ["shield"] = "rbxassetid://10702876015",
+    ["shield-off"] = "rbxassetid://10702876239",
+    ["shopping-bag"] = "rbxassetid://10702876464",
+    ["shopping-cart"] = "rbxassetid://10702876696",
+    ["shuffle"] = "rbxassetid://10702876925",
+    ["sidebar"] = "rbxassetid://10702877153",
+    ["skip-back"] = "rbxassetid://10702877380",
+    ["skip-forward"] = "rbxassetid://10702877609",
+    ["slack"] = "rbxassetid://10702877842",
+    ["slash"] = "rbxassetid://10702878070",
+    ["sliders"] = "rbxassetid://10702878297",
+    ["smartphone"] = "rbxassetid://10702878527",
+    ["smile"] = "rbxassetid://10702878757",
+    ["speaker"] = "rbxassetid://10702878985",
+    ["square"] = "rbxassetid://10702879213",
+    ["star"] = "rbxassetid://10702879443",
+    ["stop-circle"] = "rbxassetid://10702879676",
+    ["sun"] = "rbxassetid://10702879903",
+    ["sunrise"] = "rbxassetid://10702880129",
+    ["sunset"] = "rbxassetid://10702880355",
+    ["tablet"] = "rbxassetid://10702880583",
+    ["tag"] = "rbxassetid://10702880810",
+    ["target"] = "rbxassetid://10702881036",
+    ["terminal"] = "rbxassetid://10702881261",
+    ["thermometer"] = "rbxassetid://10702881489",
+    ["thumbs-down"] = "rbxassetid://10702881716",
+    ["thumbs-up"] = "rbxassetid://10702881943",
+    ["toggle-left"] = "rbxassetid://10702882169",
+    ["toggle-right"] = "rbxassetid://10702882396",
+    ["tool"] = "rbxassetid://10702882624",
+    ["trash"] = "rbxassetid://10702882852",
+    ["trash-2"] = "rbxassetid://10702883080",
+    ["trello"] = "rbxassetid://10702883309",
+    ["trending-down"] = "rbxassetid://10702883538",
+    ["trending-up"] = "rbxassetid://10702883765",
+    ["triangle"] = "rbxassetid://10702883994",
+    ["truck"] = "rbxassetid://10702884221",
+    ["tv"] = "rbxassetid://10702884449",
+    ["twitch"] = "rbxassetid://10702884677",
+    ["twitter"] = "rbxassetid://10702884906",
+    ["type"] = "rbxassetid://10702885135",
+    ["umbrella"] = "rbxassetid://10702885366",
+    ["underline"] = "rbxassetid://10702885592",
+    ["unlock"] = "rbxassetid://10702885824",
+    ["upload"] = "rbxassetid://10702886053",
+    ["upload-cloud"] = "rbxassetid://10702886280",
+    ["user"] = "rbxassetid://10702886509",
+    ["user-check"] = "rbxassetid://10702886735",
+    ["user-minus"] = "rbxassetid://10702886964",
+    ["user-plus"] = "rbxassetid://10702887193",
+    ["user-x"] = "rbxassetid://10702887421",
+    ["users"] = "rbxassetid://10702887649",
+    ["video"] = "rbxassetid://10702887877",
+    ["video-off"] = "rbxassetid://10702888104",
+    ["voicemail"] = "rbxassetid://10702888334",
+    ["volume"] = "rbxassetid://10702888559",
+    ["volume-1"] = "rbxassetid://10702888787",
+    ["volume-2"] = "rbxassetid://10702889015",
+    ["volume-x"] = "rbxassetid://10702889246",
+    ["watch"] = "rbxassetid://10702889476",
+    ["wifi"] = "rbxassetid://10702889705",
+    ["wifi-off"] = "rbxassetid://10702889933",
+    ["wind"] = "rbxassetid://10702890161",
+    ["x"] = "rbxassetid://10702890389",
+    ["x-circle"] = "rbxassetid://10702890616",
+    ["x-octagon"] = "rbxassetid://10702890844",
+    ["x-square"] = "rbxassetid://10702891071",
+    ["youtube"] = "rbxassetid://10702891299",
+    ["zap"] = "rbxassetid://10702891527",
+    ["zap-off"] = "rbxassetid://10702891752",
+    ["zoom-in"] = "rbxassetid://10702891980",
+    ["zoom-out"] = "rbxassetid://10702892208",
 }
 
 local function CreateIcon(parent, iconName, size)
@@ -82,7 +340,7 @@ local function CreateIcon(parent, iconName, size)
     return icon
 end
 
-local function CreateFrame(parent, name, size, position)
+local function CreateFrame(parent, name, size, position, cornerRadius)
     local frame = Instance.new("Frame")
     frame.Name = name
     frame.Size = size
@@ -90,6 +348,12 @@ local function CreateFrame(parent, name, size, position)
     frame.BackgroundColor3 = Colors.Secondary
     frame.BorderSizePixel = 0
     frame.Parent = parent
+    
+    if cornerRadius then
+        local corner = Instance.new("UICorner")
+        corner.CornerRadius = UDim.new(0, cornerRadius)
+        corner.Parent = frame
+    end
     
     local border = Instance.new("UIStroke")
     border.Color = Colors.Border
@@ -108,6 +372,7 @@ function Spectrum:CreateWindow(config)
     self.Icon = config.Icon or nil
     self.Tabs = {}
     self.CurrentTab = nil
+    self.Notifications = {}
     
     self.ScreenGui = Instance.new("ScreenGui")
     self.ScreenGui.Name = "Spectrum_" .. math.random(1000, 9999)
@@ -123,7 +388,7 @@ function Spectrum:CreateWindow(config)
         self.ScreenGui.Parent = CoreGui
     end
     
-    self.Main = CreateFrame(self.ScreenGui, "Main", UDim2.new(0, 480, 0, 360), UDim2.new(0.5, -240, 0.5, -180))
+    self.Main = CreateFrame(self.ScreenGui, "Main", UDim2.new(0, 480, 0, 360), UDim2.new(0.5, -240, 0.5, -180), 8)
     self.Main.BackgroundColor3 = Colors.Background
     
     local dragging, dragInput, dragStart, startPos
@@ -155,7 +420,7 @@ function Spectrum:CreateWindow(config)
         end
     end)
     
-    local Header = CreateFrame(self.Main, "Header", UDim2.new(1, 0, 0, 50), UDim2.new(0, 0, 0, 0))
+    local Header = CreateFrame(self.Main, "Header", UDim2.new(1, 0, 0, 50), UDim2.new(0, 0, 0, 0), 0)
     Header.BackgroundColor3 = Colors.Background
     
     if self.Icon then
@@ -199,6 +464,10 @@ function Spectrum:CreateWindow(config)
     CloseBtn.Font = Enum.Font.GothamBold
     CloseBtn.Parent = Header
     
+    local CloseCorner = Instance.new("UICorner")
+    CloseCorner.CornerRadius = UDim.new(0, 6)
+    CloseCorner.Parent = CloseBtn
+    
     local CloseBorder = Instance.new("UIStroke")
     CloseBorder.Color = Colors.Border
     CloseBorder.Thickness = 1
@@ -216,19 +485,106 @@ function Spectrum:CreateWindow(config)
         Tween(CloseBtn, {BackgroundColor3 = Colors.Secondary})
     end)
     
-    self.TabContainer = CreateFrame(self.Main, "TabContainer", UDim2.new(0, 150, 1, -60), UDim2.new(0, 5, 0, 55))
+    self.TabContainer = CreateFrame(self.Main, "TabContainer", UDim2.new(0, 150, 1, -60), UDim2.new(0, 5, 0, 55), 6)
     
     local TabList = Instance.new("UIListLayout")
     TabList.SortOrder = Enum.SortOrder.LayoutOrder
     TabList.Padding = UDim.new(0, 5)
     TabList.Parent = self.TabContainer
     
-    self.ContentContainer = CreateFrame(self.Main, "ContentContainer", UDim2.new(1, -165, 1, -60), UDim2.new(0, 160, 0, 55))
+    self.ContentContainer = CreateFrame(self.Main, "ContentContainer", UDim2.new(1, -165, 1, -60), UDim2.new(0, 160, 0, 55), 6)
+    
+    self.NotificationContainer = Instance.new("Frame")
+    self.NotificationContainer.Name = "Notifications"
+    self.NotificationContainer.Position = UDim2.new(1, -310, 0, 10)
+    self.NotificationContainer.Size = UDim2.new(0, 300, 1, -20)
+    self.NotificationContainer.BackgroundTransparency = 1
+    self.NotificationContainer.Parent = self.ScreenGui
+    
+    local NotifList = Instance.new("UIListLayout")
+    NotifList.SortOrder = Enum.SortOrder.LayoutOrder
+    NotifList.Padding = UDim.new(0, 10)
+    NotifList.VerticalAlignment = Enum.VerticalAlignment.Bottom
+    NotifList.Parent = self.NotificationContainer
     
     return self
 end
 
-function Spectrum:CreateTab(config)
+function Spectrum:Notify(config)
+    local NotifFrame = CreateFrame(self.NotificationContainer, "Notification", UDim2.new(1, 0, 0, 80), nil, 8)
+    NotifFrame.BackgroundColor3 = Colors.NotifyBg
+    NotifFrame.Position = UDim2.new(1, 10, 1, 0)
+    
+    local typeColors = {
+        success = Colors.Success,
+        warning = Colors.Warning,
+        error = Colors.Error,
+        info = Colors.Info
+    }
+    
+    local typeIcons = {
+        success = "check-circle",
+        warning = "alert-triangle",
+        error = "x-circle",
+        info = "info"
+    }
+    
+    local notifType = config.Type or "info"
+    local accentColor = typeColors[notifType] or Colors.Info
+    
+    local AccentBar = Instance.new("Frame")
+    AccentBar.Name = "Accent"
+    AccentBar.Size = UDim2.new(0, 4, 1, 0)
+    AccentBar.BackgroundColor3 = accentColor
+    AccentBar.BorderSizePixel = 0
+    AccentBar.Parent = NotifFrame
+    
+    local AccentCorner = Instance.new("UICorner")
+    AccentCorner.CornerRadius = UDim.new(1, 0)
+    AccentCorner.Parent = AccentBar
+    
+    if config.Icon or typeIcons[notifType] then
+        local NotifIcon = CreateIcon(NotifFrame, config.Icon or typeIcons[notifType], 24)
+        NotifIcon.Position = UDim2.new(0, 15, 0, 12)
+        NotifIcon.ImageColor3 = accentColor
+    end
+    
+    local TitleLabel = Instance.new("TextLabel")
+    TitleLabel.Position = UDim2.new(0, 50, 0, 10)
+    TitleLabel.Size = UDim2.new(1, -60, 0, 20)
+    TitleLabel.BackgroundTransparency = 1
+    TitleLabel.Text = config.Title or "Notification"
+    TitleLabel.TextColor3 = Colors.Text
+    TitleLabel.TextSize = 14
+    TitleLabel.Font = Enum.Font.GothamBold
+    TitleLabel.TextXAlignment = Enum.TextXAlignment.Left
+    TitleLabel.Parent = NotifFrame
+    
+    local ContentLabel = Instance.new("TextLabel")
+    ContentLabel.Position = UDim2.new(0, 50, 0, 32)
+    ContentLabel.Size = UDim2.new(1, -60, 0, 40)
+    ContentLabel.BackgroundTransparency = 1
+    ContentLabel.Text = config.Content or ""
+    ContentLabel.TextColor3 = Colors.TextDim
+    ContentLabel.TextSize = 12
+    ContentLabel.Font = Enum.Font.Gotham
+    ContentLabel.TextXAlignment = Enum.TextXAlignment.Left
+    ContentLabel.TextYAlignment = Enum.TextYAlignment.Top
+    ContentLabel.TextWrapped = true
+    ContentLabel.Parent = NotifFrame
+    
+    Tween(NotifFrame, {Position = UDim2.new(0, 0, 1, -90)}, 0.5)
+    
+    task.delay(config.Duration or 5, function()
+        Tween(NotifFrame, {Position = UDim2.new(1, 10, 1, -90)}, 0.5)
+        task.wait(0.5)
+        NotifFrame:Destroy()
+    end)
+    
+    return NotifFrame
+end
+
+function Spectrum:AddTab(config)
     local Tab = {}
     Tab.Name = config.Name or "Tab"
     Tab.Icon = config.Icon or nil
@@ -241,6 +597,10 @@ function Spectrum:CreateTab(config)
     Tab.Button.BorderSizePixel = 0
     Tab.Button.Text = ""
     Tab.Button.Parent = self.TabContainer
+    
+    local TabCorner = Instance.new("UICorner")
+    TabCorner.CornerRadius = UDim.new(0, 6)
+    TabCorner.Parent = Tab.Button
     
     local TabBorder = Instance.new("UIStroke")
     TabBorder.Color = Colors.Border
@@ -304,6 +664,46 @@ function Spectrum:CreateTab(config)
         end
     end)
     
+    function Tab:Button(config)
+        return Spectrum:CreateButton(Tab, config)
+    end
+    
+    function Tab:Toggle(config)
+        return Spectrum:CreateToggle(Tab, config)
+    end
+    
+    function Tab:Slider(config)
+        return Spectrum:CreateSlider(Tab, config)
+    end
+    
+    function Tab:Dropdown(config)
+        return Spectrum:CreateDropdown(Tab, config)
+    end
+    
+    function Tab:Textbox(config)
+        return Spectrum:CreateTextbox(Tab, config)
+    end
+    
+    function Tab:Keybind(config)
+        return Spectrum:CreateKeybind(Tab, config)
+    end
+    
+    function Tab:ColorPicker(config)
+        return Spectrum:CreateColorPicker(Tab, config)
+    end
+    
+    function Tab:Paragraph(config)
+        return Spectrum:CreateParagraph(Tab, config)
+    end
+    
+    function Tab:Label(text)
+        return Spectrum:CreateLabel(Tab, text)
+    end
+    
+    function Tab:Divider()
+        return Spectrum:CreateDivider(Tab)
+    end
+    
     table.insert(self.Tabs, Tab)
     
     if #self.Tabs == 1 then
@@ -327,18 +727,14 @@ function Spectrum:SelectTab(tab)
 end
 
 function Spectrum:CreateButton(tab, config)
-    local Button = Instance.new("TextButton")
-    Button.Name = config.Name or "Button"
-    Button.Size = UDim2.new(1, -10, 0, 40)
-    Button.BackgroundColor3 = Colors.Button
-    Button.BorderSizePixel = 0
-    Button.Text = ""
-    Button.Parent = tab.Content
+    local ButtonFrame = CreateFrame(tab.Content, config.Name or "Button", UDim2.new(1, -10, 0, 40), nil, 6)
+    ButtonFrame.BackgroundColor3 = Colors.Button
     
-    local ButtonBorder = Instance.new("UIStroke")
-    ButtonBorder.Color = Colors.Border
-    ButtonBorder.Thickness = 1
-    ButtonBorder.Parent = Button
+    local Button = Instance.new("TextButton")
+    Button.Size = UDim2.new(1, 0, 1, 0)
+    Button.BackgroundTransparency = 1
+    Button.Text = ""
+    Button.Parent = ButtonFrame
     
     local ButtonLabel = Instance.new("TextLabel")
     ButtonLabel.Position = UDim2.new(0, 10, 0, 0)
@@ -349,9 +745,9 @@ function Spectrum:CreateButton(tab, config)
     ButtonLabel.TextSize = 14
     ButtonLabel.Font = Enum.Font.Gotham
     ButtonLabel.TextXAlignment = Enum.TextXAlignment.Left
-    ButtonLabel.Parent = Button
+    ButtonLabel.Parent = ButtonFrame
     
-    local ClickIcon = CreateIcon(Button, "pointer", 18)
+    local ClickIcon = CreateIcon(ButtonFrame, "mouse-pointer", 18)
     ClickIcon.Position = UDim2.new(1, -28, 0.5, -9)
     
     Button.MouseButton1Click:Connect(function()
@@ -361,18 +757,18 @@ function Spectrum:CreateButton(tab, config)
     end)
     
     Button.MouseEnter:Connect(function()
-        Tween(Button, {BackgroundColor3 = Colors.ButtonHover})
+        Tween(ButtonFrame, {BackgroundColor3 = Colors.ButtonHover})
     end)
     
     Button.MouseLeave:Connect(function()
-        Tween(Button, {BackgroundColor3 = Colors.Button})
+        Tween(ButtonFrame, {BackgroundColor3 = Colors.Button})
     end)
     
-    return Button
+    return ButtonFrame
 end
 
 function Spectrum:CreateToggle(tab, config)
-    local ToggleFrame = CreateFrame(tab.Content, config.Name or "Toggle", UDim2.new(1, -10, 0, 40))
+    local ToggleFrame = CreateFrame(tab.Content, config.Name or "Toggle", UDim2.new(1, -10, 0, 40), nil, 6)
     ToggleFrame.BackgroundColor3 = Colors.Button
     
     local ToggleLabel = Instance.new("TextLabel")
@@ -390,10 +786,14 @@ function Spectrum:CreateToggle(tab, config)
     ToggleButton.Name = "ToggleButton"
     ToggleButton.Position = UDim2.new(1, -45, 0.5, -10)
     ToggleButton.Size = UDim2.new(0, 40, 0, 20)
-    ToggleButton.BackgroundColor3 = Colors.Secondary
+    ToggleButton.BackgroundColor3 = Colors.ToggleDisabled
     ToggleButton.BorderSizePixel = 0
     ToggleButton.Text = ""
     ToggleButton.Parent = ToggleFrame
+    
+    local ToggleCorner = Instance.new("UICorner")
+    ToggleCorner.CornerRadius = UDim.new(1, 0)
+    ToggleCorner.Parent = ToggleButton
     
     local ToggleBorder = Instance.new("UIStroke")
     ToggleBorder.Color = Colors.Border
@@ -408,14 +808,18 @@ function Spectrum:CreateToggle(tab, config)
     ToggleCircle.BorderSizePixel = 0
     ToggleCircle.Parent = ToggleButton
     
+    local CircleCorner = Instance.new("UICorner")
+    CircleCorner.CornerRadius = UDim.new(1, 0)
+    CircleCorner.Parent = ToggleCircle
+    
     local State = config.Default or false
     
     local function UpdateToggle()
         if State then
-            Tween(ToggleButton, {BackgroundColor3 = Colors.Toggle})
+            Tween(ToggleButton, {BackgroundColor3 = Colors.ToggleEnabled})
             Tween(ToggleCircle, {Position = UDim2.new(1, -18, 0.5, -8)})
         else
-            Tween(ToggleButton, {BackgroundColor3 = Colors.Secondary})
+            Tween(ToggleButton, {BackgroundColor3 = Colors.ToggleDisabled})
             Tween(ToggleCircle, {Position = UDim2.new(0, 2, 0.5, -8)})
         end
         
@@ -432,15 +836,18 @@ function Spectrum:CreateToggle(tab, config)
     UpdateToggle()
     
     return {
-        SetValue = function(value)
+        Set = function(value)
             State = value
             UpdateToggle()
+        end,
+        Get = function()
+            return State
         end
     }
 end
 
 function Spectrum:CreateSlider(tab, config)
-    local SliderFrame = CreateFrame(tab.Content, config.Name or "Slider", UDim2.new(1, -10, 0, 70))
+    local SliderFrame = CreateFrame(tab.Content, config.Name or "Slider", UDim2.new(1, -10, 0, 70), nil, 6)
     SliderFrame.BackgroundColor3 = Colors.Button
     
     local SliderLabel = Instance.new("TextLabel")
@@ -467,12 +874,16 @@ function Spectrum:CreateSlider(tab, config)
     InputBox.ClearTextOnFocus = false
     InputBox.Parent = SliderFrame
     
+    local InputCorner = Instance.new("UICorner")
+    InputCorner.CornerRadius = UDim.new(0, 4)
+    InputCorner.Parent = InputBox
+    
     local InputBorder = Instance.new("UIStroke")
     InputBorder.Color = Colors.Border
     InputBorder.Thickness = 1
     InputBorder.Parent = InputBox
     
-    local SliderTrack = CreateFrame(SliderFrame, "Track", UDim2.new(1, -20, 0, 6), UDim2.new(0, 10, 0, 38))
+    local SliderTrack = CreateFrame(SliderFrame, "Track", UDim2.new(1, -20, 0, 6), UDim2.new(0, 10, 0, 38), 3)
     SliderTrack.BackgroundColor3 = Colors.Secondary
     
     local SliderFill = Instance.new("Frame")
@@ -481,6 +892,10 @@ function Spectrum:CreateSlider(tab, config)
     SliderFill.BackgroundColor3 = Colors.Slider
     SliderFill.BorderSizePixel = 0
     SliderFill.Parent = SliderTrack
+    
+    local FillCorner = Instance.new("UICorner")
+    FillCorner.CornerRadius = UDim.new(0, 3)
+    FillCorner.Parent = SliderFill
     
     local ValueLabel = Instance.new("TextLabel")
     ValueLabel.Position = UDim2.new(0, 10, 0, 50)
@@ -565,15 +980,18 @@ function Spectrum:CreateSlider(tab, config)
     UpdateSlider(Value)
     
     return {
-        SetValue = function(value)
+        Set = function(value)
             UpdateSlider(value)
+        end,
+        Get = function()
+            return Value
         end
     }
 end
 
 function Spectrum:CreateDropdown(tab, config)
     local Multi = config.Multi or false
-    local DropdownFrame = CreateFrame(tab.Content, config.Name or "Dropdown", UDim2.new(1, -10, 0, 40))
+    local DropdownFrame = CreateFrame(tab.Content, config.Name or "Dropdown", UDim2.new(1, -10, 0, 40), nil, 6)
     DropdownFrame.BackgroundColor3 = Colors.Button
     DropdownFrame.ClipsDescendants = true
     
@@ -674,6 +1092,10 @@ function Spectrum:CreateDropdown(tab, config)
             Checkbox.BorderSizePixel = 0
             Checkbox.Parent = OptionButton
             
+            local CheckCorner = Instance.new("UICorner")
+            CheckCorner.CornerRadius = UDim.new(0, 3)
+            CheckCorner.Parent = Checkbox
+            
             local CheckboxBorder = Instance.new("UIStroke")
             CheckboxBorder.Color = Colors.Border
             CheckboxBorder.Thickness = 1
@@ -750,7 +1172,7 @@ function Spectrum:CreateDropdown(tab, config)
     UpdateLabel()
     
     return {
-        SetValue = function(value)
+        Set = function(value)
             if Multi then
                 Selected = {}
                 for _, v in pairs(value) do
@@ -760,12 +1182,23 @@ function Spectrum:CreateDropdown(tab, config)
                 Selected = value
             end
             UpdateLabel()
+        end,
+        Get = function()
+            if Multi then
+                local list = {}
+                for item, _ in pairs(Selected) do
+                    table.insert(list, item)
+                end
+                return list
+            else
+                return Selected
+            end
         end
     }
 end
 
 function Spectrum:CreateTextbox(tab, config)
-    local TextboxFrame = CreateFrame(tab.Content, config.Name or "Textbox", UDim2.new(1, -10, 0, 40))
+    local TextboxFrame = CreateFrame(tab.Content, config.Name or "Textbox", UDim2.new(1, -10, 0, 40), nil, 6)
     TextboxFrame.BackgroundColor3 = Colors.Button
     
     local TextboxLabel = Instance.new("TextLabel")
@@ -794,6 +1227,10 @@ function Spectrum:CreateTextbox(tab, config)
     Textbox.ClearTextOnFocus = false
     Textbox.Parent = TextboxFrame
     
+    local TextboxCorner = Instance.new("UICorner")
+    TextboxCorner.CornerRadius = UDim.new(0, 4)
+    TextboxCorner.Parent = Textbox
+    
     local TextboxBorder = Instance.new("UIStroke")
     TextboxBorder.Color = Colors.Border
     TextboxBorder.Thickness = 1
@@ -806,14 +1243,17 @@ function Spectrum:CreateTextbox(tab, config)
     end)
     
     return {
-        SetValue = function(text)
+        Set = function(text)
             Textbox.Text = text
+        end,
+        Get = function()
+            return Textbox.Text
         end
     }
 end
 
 function Spectrum:CreateKeybind(tab, config)
-    local KeybindFrame = CreateFrame(tab.Content, config.Name or "Keybind", UDim2.new(1, -10, 0, 40))
+    local KeybindFrame = CreateFrame(tab.Content, config.Name or "Keybind", UDim2.new(1, -10, 0, 40), nil, 6)
     KeybindFrame.BackgroundColor3 = Colors.Button
     
     local KeybindLabel = Instance.new("TextLabel")
@@ -838,6 +1278,10 @@ function Spectrum:CreateKeybind(tab, config)
     KeybindButton.TextSize = 13
     KeybindButton.Font = Enum.Font.Gotham
     KeybindButton.Parent = KeybindFrame
+    
+    local KeyCorner = Instance.new("UICorner")
+    KeyCorner.CornerRadius = UDim.new(0, 4)
+    KeyCorner.Parent = KeybindButton
     
     local KeybindBorder = Instance.new("UIStroke")
     KeybindBorder.Color = Colors.Border
@@ -868,22 +1312,27 @@ function Spectrum:CreateKeybind(tab, config)
         end)
     end)
     
-    UserInputService.InputBegan:Connect(function(input, gameProcessed)
-        if not gameProcessed and input.KeyCode.Name == CurrentKey and config.Callback then
-            config.Callback(CurrentKey)
-        end
-    end)
+    if config.Callback then
+        UserInputService.InputBegan:Connect(function(input, gameProcessed)
+            if not gameProcessed and input.KeyCode.Name == CurrentKey then
+                config.Callback(CurrentKey)
+            end
+        end)
+    end
     
     return {
-        SetValue = function(key)
+        Set = function(key)
             CurrentKey = key
             KeybindButton.Text = key
+        end,
+        Get = function()
+            return CurrentKey
         end
     }
 end
 
 function Spectrum:CreateColorPicker(tab, config)
-    local ColorFrame = CreateFrame(tab.Content, config.Name or "ColorPicker", UDim2.new(1, -10, 0, 40))
+    local ColorFrame = CreateFrame(tab.Content, config.Name or "ColorPicker", UDim2.new(1, -10, 0, 40), nil, 6)
     ColorFrame.BackgroundColor3 = Colors.Button
     
     local ColorLabel = Instance.new("TextLabel")
@@ -906,6 +1355,10 @@ function Spectrum:CreateColorPicker(tab, config)
     ColorDisplay.Text = ""
     ColorDisplay.Parent = ColorFrame
     
+    local ColorCorner = Instance.new("UICorner")
+    ColorCorner.CornerRadius = UDim.new(0, 4)
+    ColorCorner.Parent = ColorDisplay
+    
     local ColorBorder = Instance.new("UIStroke")
     ColorBorder.Color = Colors.Border
     ColorBorder.Thickness = 1
@@ -920,23 +1373,27 @@ function Spectrum:CreateColorPicker(tab, config)
     end)
     
     return {
-        SetValue = function(color)
+        Set = function(color)
             CurrentColor = color
             ColorDisplay.BackgroundColor3 = color
             if config.Callback then
                 config.Callback(color)
             end
+        end,
+        Get = function()
+            return CurrentColor
         end
     }
 end
 
 function Spectrum:CreateParagraph(tab, config)
-    local ParagraphFrame = CreateFrame(tab.Content, "Paragraph", UDim2.new(1, -10, 0, 0))
+    local ParagraphFrame = CreateFrame(tab.Content, "Paragraph", UDim2.new(1, -10, 0, 0), nil, 6)
     ParagraphFrame.BackgroundColor3 = Colors.Button
     ParagraphFrame.AutomaticSize = Enum.AutomaticSize.Y
     
+    local TitleLabel
     if config.Title then
-        local TitleLabel = Instance.new("TextLabel")
+        TitleLabel = Instance.new("TextLabel")
         TitleLabel.Position = UDim2.new(0, 10, 0, 8)
         TitleLabel.Size = UDim2.new(1, -20, 0, 20)
         TitleLabel.BackgroundTransparency = 1
@@ -967,7 +1424,24 @@ function Spectrum:CreateParagraph(tab, config)
     Padding.PaddingBottom = UDim.new(0, 8)
     Padding.Parent = ParagraphFrame
     
-    return ParagraphFrame
+    return {
+        SetTitle = function(text)
+            if TitleLabel then
+                TitleLabel.Text = text
+            end
+        end,
+        SetContent = function(text)
+            ContentLabel.Text = text
+        end,
+        Set = function(title, content)
+            if TitleLabel and title then
+                TitleLabel.Text = title
+            end
+            if content then
+                ContentLabel.Text = content
+            end
+        end
+    }
 end
 
 function Spectrum:CreateDivider(tab)
@@ -993,7 +1467,11 @@ function Spectrum:CreateLabel(tab, text)
     Label.TextXAlignment = Enum.TextXAlignment.Left
     Label.Parent = tab.Content
     
-    return Label
+    return {
+        Set = function(newText)
+            Label.Text = newText
+        end
+    }
 end
 
 function Spectrum:CreateUIToggle(config)
