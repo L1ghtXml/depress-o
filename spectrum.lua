@@ -1,0 +1,752 @@
+--[[
+    BlackUI Library v1.0
+    Uma biblioteca moderna de UI com tema all black para executores externos
+    Suporta mobile e PC com componentes completos
+]]
+
+local BlackUI = {}
+BlackUI.__index = BlackUI
+
+-- Serviços
+local Players = game:GetService("Players")
+local TweenService = game:GetService("TweenService")
+local UserInputService = game:GetService("UserInputService")
+local RunService = game:GetService("RunService")
+local CoreGui = game:GetService("CoreGui")
+
+local Player = Players.LocalPlayer
+local Mouse = Player:GetMouse()
+
+-- Configurações de Cores
+local Colors = {
+    Background = Color3.fromRGB(10, 10, 10),
+    Secondary = Color3.fromRGB(20, 20, 20),
+    Border = Color3.fromRGB(40, 40, 40),
+    Accent = Color3.fromRGB(255, 255, 255),
+    Text = Color3.fromRGB(255, 255, 255),
+    TextDim = Color3.fromRGB(150, 150, 150),
+    Toggle = Color3.fromRGB(0, 200, 100),
+    Slider = Color3.fromRGB(200, 200, 200),
+    Button = Color3.fromRGB(30, 30, 30),
+    ButtonHover = Color3.fromRGB(40, 40, 40)
+}
+
+-- Função de Tween
+local function Tween(instance, properties, duration)
+    local tweenInfo = TweenInfo.new(duration or 0.2, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
+    local tween = TweenService:Create(instance, tweenInfo, properties)
+    tween:Play()
+    return tween
+end
+
+-- Função para criar ícones Lucide
+local function CreateIcon(parent, iconName, size)
+    local icon = Instance.new("ImageLabel")
+    icon.Name = "Icon"
+    icon.Size = UDim2.new(0, size or 20, 0, size or 20)
+    icon.BackgroundTransparency = 1
+    icon.Image = "rbxasset://textures/ui/GuiImagePlaceholder.png" -- Placeholder
+    icon.ImageColor3 = Colors.Text
+    icon.ScaleType = Enum.ScaleType.Fit
+    icon.Parent = parent
+    
+    -- Aqui você pode adicionar URLs de ícones Lucide reais
+    -- Exemplo: icon.Image = "rbxassetid://ICON_ID"
+    
+    return icon
+end
+
+-- Função para criar elementos com cantos quadrados e bordas
+local function CreateFrame(parent, name, size, position)
+    local frame = Instance.new("Frame")
+    frame.Name = name
+    frame.Size = size
+    frame.Position = position or UDim2.new(0, 0, 0, 0)
+    frame.BackgroundColor3 = Colors.Secondary
+    frame.BorderSizePixel = 0
+    frame.Parent = parent
+    
+    local border = Instance.new("UIStroke")
+    border.Color = Colors.Border
+    border.Thickness = 1
+    border.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+    border.Parent = frame
+    
+    return frame
+end
+
+-- Criar UI Principal
+function BlackUI:CreateWindow(config)
+    local self = setmetatable({}, BlackUI)
+    
+    -- Configurações
+    self.Title = config.Title or "BlackUI"
+    self.Author = config.Author or "Unknown"
+    self.Icon = config.Icon or nil
+    self.Tabs = {}
+    self.CurrentTab = nil
+    
+    -- ScreenGui
+    self.ScreenGui = Instance.new("ScreenGui")
+    self.ScreenGui.Name = "BlackUI_" .. math.random(1000, 9999)
+    self.ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+    self.ScreenGui.ResetOnSpawn = false
+    
+    -- Proteção contra detecção
+    if gethui then
+        self.ScreenGui.Parent = gethui()
+    elseif syn and syn.protect_gui then
+        syn.protect_gui(self.ScreenGui)
+        self.ScreenGui.Parent = CoreGui
+    else
+        self.ScreenGui.Parent = CoreGui
+    end
+    
+    -- Main Container
+    self.Main = CreateFrame(self.ScreenGui, "Main", UDim2.new(0, 600, 0, 450), UDim2.new(0.5, -300, 0.5, -225))
+    self.Main.BackgroundColor3 = Colors.Background
+    
+    -- Drag functionality
+    local dragging, dragInput, dragStart, startPos
+    
+    self.Main.InputBegan:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+            dragging = true
+            dragStart = input.Position
+            startPos = self.Main.Position
+            
+            input.Changed:Connect(function()
+                if input.UserInputState == Enum.UserInputState.End then
+                    dragging = false
+                end
+            end)
+        end
+    end)
+    
+    self.Main.InputChanged:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch then
+            dragInput = input
+        end
+    end)
+    
+    UserInputService.InputChanged:Connect(function(input)
+        if input == dragInput and dragging then
+            local delta = input.Position - dragStart
+            self.Main.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
+        end
+    end)
+    
+    -- Header
+    local Header = CreateFrame(self.Main, "Header", UDim2.new(1, 0, 0, 50), UDim2.new(0, 0, 0, 0))
+    Header.BackgroundColor3 = Colors.Background
+    
+    -- Logo/Icon
+    if self.Icon then
+        local IconFrame = CreateIcon(Header, self.Icon, 30)
+        IconFrame.Position = UDim2.new(0, 10, 0.5, -15)
+    end
+    
+    -- Title
+    local TitleLabel = Instance.new("TextLabel")
+    TitleLabel.Name = "Title"
+    TitleLabel.Position = UDim2.new(0, self.Icon and 50 or 10, 0, 5)
+    TitleLabel.Size = UDim2.new(0, 200, 0, 25)
+    TitleLabel.BackgroundTransparency = 1
+    TitleLabel.Text = self.Title
+    TitleLabel.TextColor3 = Colors.Text
+    TitleLabel.TextSize = 18
+    TitleLabel.Font = Enum.Font.GothamBold
+    TitleLabel.TextXAlignment = Enum.TextXAlignment.Left
+    TitleLabel.Parent = Header
+    
+    -- Author
+    local AuthorLabel = Instance.new("TextLabel")
+    AuthorLabel.Name = "Author"
+    AuthorLabel.Position = UDim2.new(0, self.Icon and 50 or 10, 0, 28)
+    AuthorLabel.Size = UDim2.new(0, 200, 0, 17)
+    AuthorLabel.BackgroundTransparency = 1
+    AuthorLabel.Text = "by " .. self.Author
+    AuthorLabel.TextColor3 = Colors.TextDim
+    AuthorLabel.TextSize = 12
+    AuthorLabel.Font = Enum.Font.Gotham
+    AuthorLabel.TextXAlignment = Enum.TextXAlignment.Left
+    AuthorLabel.Parent = Header
+    
+    -- Close Button
+    local CloseBtn = Instance.new("TextButton")
+    CloseBtn.Name = "Close"
+    CloseBtn.Size = UDim2.new(0, 40, 0, 40)
+    CloseBtn.Position = UDim2.new(1, -45, 0, 5)
+    CloseBtn.BackgroundColor3 = Colors.Secondary
+    CloseBtn.BorderSizePixel = 0
+    CloseBtn.Text = "×"
+    CloseBtn.TextColor3 = Colors.Text
+    CloseBtn.TextSize = 24
+    CloseBtn.Font = Enum.Font.GothamBold
+    CloseBtn.Parent = Header
+    
+    local CloseBorder = Instance.new("UIStroke")
+    CloseBorder.Color = Colors.Border
+    CloseBorder.Thickness = 1
+    CloseBorder.Parent = CloseBtn
+    
+    CloseBtn.MouseButton1Click:Connect(function()
+        self.ScreenGui:Destroy()
+    end)
+    
+    CloseBtn.MouseEnter:Connect(function()
+        Tween(CloseBtn, {BackgroundColor3 = Color3.fromRGB(200, 50, 50)})
+    end)
+    
+    CloseBtn.MouseLeave:Connect(function()
+        Tween(CloseBtn, {BackgroundColor3 = Colors.Secondary})
+    end)
+    
+    -- Tab Container
+    self.TabContainer = CreateFrame(self.Main, "TabContainer", UDim2.new(0, 150, 1, -60), UDim2.new(0, 5, 0, 55))
+    
+    local TabList = Instance.new("UIListLayout")
+    TabList.SortOrder = Enum.SortOrder.LayoutOrder
+    TabList.Padding = UDim.new(0, 5)
+    TabList.Parent = self.TabContainer
+    
+    -- Content Container
+    self.ContentContainer = CreateFrame(self.Main, "ContentContainer", UDim2.new(1, -165, 1, -60), UDim2.new(0, 160, 0, 55))
+    
+    return self
+end
+
+-- Criar Tab
+function BlackUI:CreateTab(config)
+    local Tab = {}
+    Tab.Name = config.Name or "Tab"
+    Tab.Icon = config.Icon or nil
+    Tab.Elements = {}
+    
+    -- Tab Button
+    Tab.Button = Instance.new("TextButton")
+    Tab.Button.Name = Tab.Name
+    Tab.Button.Size = UDim2.new(1, 0, 0, 40)
+    Tab.Button.BackgroundColor3 = Colors.Secondary
+    Tab.Button.BorderSizePixel = 0
+    Tab.Button.Text = ""
+    Tab.Button.Parent = self.TabContainer
+    
+    local TabBorder = Instance.new("UIStroke")
+    TabBorder.Color = Colors.Border
+    TabBorder.Thickness = 1
+    TabBorder.Parent = Tab.Button
+    
+    -- Icon
+    if Tab.Icon then
+        local TabIcon = CreateIcon(Tab.Button, Tab.Icon, 20)
+        TabIcon.Position = UDim2.new(0, 10, 0.5, -10)
+    end
+    
+    -- Label
+    local TabLabel = Instance.new("TextLabel")
+    TabLabel.Position = UDim2.new(0, Tab.Icon and 40 or 10, 0, 0)
+    TabLabel.Size = UDim2.new(1, Tab.Icon and -40 or -10, 1, 0)
+    TabLabel.BackgroundTransparency = 1
+    TabLabel.Text = Tab.Name
+    TabLabel.TextColor3 = Colors.TextDim
+    TabLabel.TextSize = 14
+    TabLabel.Font = Enum.Font.Gotham
+    TabLabel.TextXAlignment = Enum.TextXAlignment.Left
+    TabLabel.Parent = Tab.Button
+    
+    -- Content Frame
+    Tab.Content = Instance.new("ScrollingFrame")
+    Tab.Content.Name = Tab.Name .. "Content"
+    Tab.Content.Size = UDim2.new(1, 0, 1, 0)
+    Tab.Content.BackgroundTransparency = 1
+    Tab.Content.BorderSizePixel = 0
+    Tab.Content.ScrollBarThickness = 4
+    Tab.Content.ScrollBarImageColor3 = Colors.Border
+    Tab.Content.CanvasSize = UDim2.new(0, 0, 0, 0)
+    Tab.Content.Visible = false
+    Tab.Content.Parent = self.ContentContainer
+    
+    local ContentList = Instance.new("UIListLayout")
+    ContentList.SortOrder = Enum.SortOrder.LayoutOrder
+    ContentList.Padding = UDim.new(0, 8)
+    ContentList.Parent = Tab.Content
+    
+    local ContentPadding = Instance.new("UIPadding")
+    ContentPadding.PaddingTop = UDim.new(0, 10)
+    ContentPadding.PaddingBottom = UDim.new(0, 10)
+    ContentPadding.PaddingLeft = UDim.new(0, 10)
+    ContentPadding.PaddingRight = UDim.new(0, 10)
+    ContentPadding.Parent = Tab.Content
+    
+    -- Auto-resize canvas
+    ContentList:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
+        Tab.Content.CanvasSize = UDim2.new(0, 0, 0, ContentList.AbsoluteContentSize.Y + 20)
+    end)
+    
+    -- Tab Click
+    Tab.Button.MouseButton1Click:Connect(function()
+        self:SelectTab(Tab)
+    end)
+    
+    Tab.Button.MouseEnter:Connect(function()
+        if self.CurrentTab ~= Tab then
+            Tween(Tab.Button, {BackgroundColor3 = Colors.ButtonHover})
+        end
+    end)
+    
+    Tab.Button.MouseLeave:Connect(function()
+        if self.CurrentTab ~= Tab then
+            Tween(Tab.Button, {BackgroundColor3 = Colors.Secondary})
+        end
+    end)
+    
+    table.insert(self.Tabs, Tab)
+    
+    -- Select first tab
+    if #self.Tabs == 1 then
+        self:SelectTab(Tab)
+    end
+    
+    return Tab
+end
+
+-- Selecionar Tab
+function BlackUI:SelectTab(tab)
+    for _, t in pairs(self.Tabs) do
+        t.Content.Visible = false
+        Tween(t.Button, {BackgroundColor3 = Colors.Secondary})
+        t.Button:FindFirstChildOfClass("TextLabel").TextColor3 = Colors.TextDim
+    end
+    
+    tab.Content.Visible = true
+    Tween(tab.Button, {BackgroundColor3 = Colors.ButtonHover})
+    tab.Button:FindFirstChildOfClass("TextLabel").TextColor3 = Colors.Text
+    self.CurrentTab = tab
+end
+
+-- Criar Botão
+function BlackUI:CreateButton(tab, config)
+    local Button = Instance.new("TextButton")
+    Button.Name = config.Name or "Button"
+    Button.Size = UDim2.new(1, -10, 0, 40)
+    Button.BackgroundColor3 = Colors.Button
+    Button.BorderSizePixel = 0
+    Button.Text = config.Text or "Button"
+    Button.TextColor3 = Colors.Text
+    Button.TextSize = 14
+    Button.Font = Enum.Font.Gotham
+    Button.Parent = tab.Content
+    
+    local ButtonBorder = Instance.new("UIStroke")
+    ButtonBorder.Color = Colors.Border
+    ButtonBorder.Thickness = 1
+    ButtonBorder.Parent = Button
+    
+    Button.MouseButton1Click:Connect(function()
+        if config.Callback then
+            config.Callback()
+        end
+    end)
+    
+    Button.MouseEnter:Connect(function()
+        Tween(Button, {BackgroundColor3 = Colors.ButtonHover})
+    end)
+    
+    Button.MouseLeave:Connect(function()
+        Tween(Button, {BackgroundColor3 = Colors.Button})
+    end)
+    
+    return Button
+end
+
+-- Criar Toggle
+function BlackUI:CreateToggle(tab, config)
+    local ToggleFrame = CreateFrame(tab.Content, config.Name or "Toggle", UDim2.new(1, -10, 0, 40))
+    ToggleFrame.BackgroundColor3 = Colors.Button
+    
+    local ToggleLabel = Instance.new("TextLabel")
+    ToggleLabel.Position = UDim2.new(0, 10, 0, 0)
+    ToggleLabel.Size = UDim2.new(1, -60, 1, 0)
+    ToggleLabel.BackgroundTransparency = 1
+    ToggleLabel.Text = config.Text or "Toggle"
+    ToggleLabel.TextColor3 = Colors.Text
+    ToggleLabel.TextSize = 14
+    ToggleLabel.Font = Enum.Font.Gotham
+    ToggleLabel.TextXAlignment = Enum.TextXAlignment.Left
+    ToggleLabel.Parent = ToggleFrame
+    
+    local ToggleButton = Instance.new("TextButton")
+    ToggleButton.Name = "ToggleButton"
+    ToggleButton.Position = UDim2.new(1, -45, 0.5, -10)
+    ToggleButton.Size = UDim2.new(0, 40, 0, 20)
+    ToggleButton.BackgroundColor3 = Colors.Secondary
+    ToggleButton.BorderSizePixel = 0
+    ToggleButton.Text = ""
+    ToggleButton.Parent = ToggleFrame
+    
+    local ToggleBorder = Instance.new("UIStroke")
+    ToggleBorder.Color = Colors.Border
+    ToggleBorder.Thickness = 1
+    ToggleBorder.Parent = ToggleButton
+    
+    local ToggleCircle = Instance.new("Frame")
+    ToggleCircle.Name = "Circle"
+    ToggleCircle.Position = UDim2.new(0, 2, 0.5, -8)
+    ToggleCircle.Size = UDim2.new(0, 16, 0, 16)
+    ToggleCircle.BackgroundColor3 = Colors.Text
+    ToggleCircle.BorderSizePixel = 0
+    ToggleCircle.Parent = ToggleButton
+    
+    local State = config.Default or false
+    
+    local function UpdateToggle()
+        if State then
+            Tween(ToggleButton, {BackgroundColor3 = Colors.Toggle})
+            Tween(ToggleCircle, {Position = UDim2.new(1, -18, 0.5, -8)})
+        else
+            Tween(ToggleButton, {BackgroundColor3 = Colors.Secondary})
+            Tween(ToggleCircle, {Position = UDim2.new(0, 2, 0.5, -8)})
+        end
+        
+        if config.Callback then
+            config.Callback(State)
+        end
+    end
+    
+    ToggleButton.MouseButton1Click:Connect(function()
+        State = not State
+        UpdateToggle()
+    end)
+    
+    UpdateToggle()
+    
+    return {
+        SetValue = function(value)
+            State = value
+            UpdateToggle()
+        end
+    }
+end
+
+-- Criar Slider com Input
+function BlackUI:CreateSlider(tab, config)
+    local SliderFrame = CreateFrame(tab.Content, config.Name or "Slider", UDim2.new(1, -10, 0, 70))
+    SliderFrame.BackgroundColor3 = Colors.Button
+    
+    local SliderLabel = Instance.new("TextLabel")
+    SliderLabel.Position = UDim2.new(0, 10, 0, 5)
+    SliderLabel.Size = UDim2.new(1, -20, 0, 20)
+    SliderLabel.BackgroundTransparency = 1
+    SliderLabel.Text = config.Text or "Slider"
+    SliderLabel.TextColor3 = Colors.Text
+    SliderLabel.TextSize = 14
+    SliderLabel.Font = Enum.Font.Gotham
+    SliderLabel.TextXAlignment = Enum.TextXAlignment.Left
+    SliderLabel.Parent = SliderFrame
+    
+    -- Input Box (no topo)
+    local InputBox = Instance.new("TextBox")
+    InputBox.Name = "InputBox"
+    InputBox.Position = UDim2.new(1, -60, 0, 5)
+    InputBox.Size = UDim2.new(0, 50, 0, 20)
+    InputBox.BackgroundColor3 = Colors.Secondary
+    InputBox.BorderSizePixel = 0
+    InputBox.Text = tostring(config.Default or config.Min or 0)
+    InputBox.TextColor3 = Colors.Text
+    InputBox.TextSize = 12
+    InputBox.Font = Enum.Font.Gotham
+    InputBox.ClearTextOnFocus = false
+    InputBox.Parent = SliderFrame
+    
+    local InputBorder = Instance.new("UIStroke")
+    InputBorder.Color = Colors.Border
+    InputBorder.Thickness = 1
+    InputBorder.Parent = InputBox
+    
+    -- Slider Track
+    local SliderTrack = CreateFrame(SliderFrame, "Track", UDim2.new(1, -20, 0, 6), UDim2.new(0, 10, 0, 38))
+    SliderTrack.BackgroundColor3 = Colors.Secondary
+    
+    -- Slider Fill
+    local SliderFill = Instance.new("Frame")
+    SliderFill.Name = "Fill"
+    SliderFill.Size = UDim2.new(0, 0, 1, 0)
+    SliderFill.BackgroundColor3 = Colors.Slider
+    SliderFill.BorderSizePixel = 0
+    SliderFill.Parent = SliderTrack
+    
+    -- Value Label
+    local ValueLabel = Instance.new("TextLabel")
+    ValueLabel.Position = UDim2.new(0, 10, 0, 50)
+    ValueLabel.Size = UDim2.new(1, -20, 0, 15)
+    ValueLabel.BackgroundTransparency = 1
+    ValueLabel.Text = tostring(config.Default or config.Min or 0)
+    ValueLabel.TextColor3 = Colors.TextDim
+    ValueLabel.TextSize = 12
+    ValueLabel.Font = Enum.Font.Gotham
+    ValueLabel.TextXAlignment = Enum.TextXAlignment.Center
+    ValueLabel.Parent = SliderFrame
+    
+    local Min = config.Min or 0
+    local Max = config.Max or 100
+    local Increment = config.Increment or 1
+    local Value = config.Default or Min
+    
+    local function Round(num)
+        return math.floor(num / Increment + 0.5) * Increment
+    end
+    
+    local function UpdateSlider(value)
+        Value = math.clamp(Round(value), Min, Max)
+        local percent = (Value - Min) / (Max - Min)
+        
+        Tween(SliderFill, {Size = UDim2.new(percent, 0, 1, 0)})
+        ValueLabel.Text = tostring(Value)
+        InputBox.Text = tostring(Value)
+        
+        if config.Callback then
+            config.Callback(Value)
+        end
+    end
+    
+    -- Input Box handling
+    InputBox.FocusLost:Connect(function()
+        local inputValue = tonumber(InputBox.Text)
+        if inputValue then
+            UpdateSlider(inputValue)
+        else
+            InputBox.Text = tostring(Value)
+        end
+    end)
+    
+    -- Slider dragging
+    local dragging = false
+    
+    SliderTrack.InputBegan:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+            dragging = true
+            
+            local function Update()
+                local mousePos = UserInputService:GetMouseLocation().X
+                local trackPos = SliderTrack.AbsolutePosition.X
+                local trackSize = SliderTrack.AbsoluteSize.X
+                local percent = math.clamp((mousePos - trackPos) / trackSize, 0, 1)
+                local value = Min + (percent * (Max - Min))
+                UpdateSlider(value)
+            end
+            
+            Update()
+            
+            local connection
+            connection = input.Changed:Connect(function()
+                if input.UserInputState == Enum.UserInputState.End then
+                    dragging = false
+                    connection:Disconnect()
+                end
+            end)
+        end
+    end)
+    
+    UserInputService.InputChanged:Connect(function(input)
+        if dragging and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
+            local mousePos = UserInputService:GetMouseLocation().X
+            local trackPos = SliderTrack.AbsolutePosition.X
+            local trackSize = SliderTrack.AbsoluteSize.X
+            local percent = math.clamp((mousePos - trackPos) / trackSize, 0, 1)
+            local value = Min + (percent * (Max - Min))
+            UpdateSlider(value)
+        end
+    end)
+    
+    UpdateSlider(Value)
+    
+    return {
+        SetValue = function(value)
+            UpdateSlider(value)
+        end
+    }
+end
+
+-- Criar Dropdown
+function BlackUI:CreateDropdown(tab, config)
+    local DropdownFrame = CreateFrame(tab.Content, config.Name or "Dropdown", UDim2.new(1, -10, 0, 40))
+    DropdownFrame.BackgroundColor3 = Colors.Button
+    DropdownFrame.ClipsDescendants = true
+    
+    local DropdownLabel = Instance.new("TextLabel")
+    DropdownLabel.Position = UDim2.new(0, 10, 0, 0)
+    DropdownLabel.Size = UDim2.new(1, -40, 0, 40)
+    DropdownLabel.BackgroundTransparency = 1
+    DropdownLabel.Text = config.Text or "Dropdown"
+    DropdownLabel.TextColor3 = Colors.Text
+    DropdownLabel.TextSize = 14
+    DropdownLabel.Font = Enum.Font.Gotham
+    DropdownLabel.TextXAlignment = Enum.TextXAlignment.Left
+    DropdownLabel.Parent = DropdownFrame
+    
+    local Arrow = Instance.new("TextLabel")
+    Arrow.Position = UDim2.new(1, -30, 0, 0)
+    Arrow.Size = UDim2.new(0, 30, 0, 40)
+    Arrow.BackgroundTransparency = 1
+    Arrow.Text = "▼"
+    Arrow.TextColor3 = Colors.Text
+    Arrow.TextSize = 14
+    Arrow.Font = Enum.Font.Gotham
+    Arrow.Parent = DropdownFrame
+    
+    local OptionsFrame = Instance.new("Frame")
+    OptionsFrame.Name = "Options"
+    OptionsFrame.Position = UDim2.new(0, 0, 0, 40)
+    OptionsFrame.Size = UDim2.new(1, 0, 0, 0)
+    OptionsFrame.BackgroundColor3 = Colors.Secondary
+    OptionsFrame.BorderSizePixel = 0
+    OptionsFrame.Parent = DropdownFrame
+    
+    local OptionsList = Instance.new("UIListLayout")
+    OptionsList.SortOrder = Enum.SortOrder.LayoutOrder
+    OptionsList.Parent = OptionsFrame
+    
+    local Open = false
+    local Selected = config.Default or (config.Options and config.Options[1]) or "None"
+    
+    for _, option in ipairs(config.Options or {}) do
+        local OptionButton = Instance.new("TextButton")
+        OptionButton.Name = option
+        OptionButton.Size = UDim2.new(1, 0, 0, 35)
+        OptionButton.BackgroundColor3 = Colors.Secondary
+        OptionButton.BorderSizePixel = 0
+        OptionButton.Text = option
+        OptionButton.TextColor3 = Colors.Text
+        OptionButton.TextSize = 13
+        OptionButton.Font = Enum.Font.Gotham
+        OptionButton.Parent = OptionsFrame
+        
+        local OptionBorder = Instance.new("UIStroke")
+        OptionBorder.Color = Colors.Border
+        OptionBorder.Thickness = 1
+        OptionBorder.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+        OptionBorder.Parent = OptionButton
+        
+        OptionButton.MouseButton1Click:Connect(function()
+            Selected = option
+            DropdownLabel.Text = (config.Text or "Dropdown") .. ": " .. Selected
+            Open = false
+            
+            Tween(DropdownFrame, {Size = UDim2.new(1, -10, 0, 40)})
+            Tween(Arrow, {Rotation = 0})
+            
+            if config.Callback then
+                config.Callback(Selected)
+            end
+        end)
+        
+        OptionButton.MouseEnter:Connect(function()
+            Tween(OptionButton, {BackgroundColor3 = Colors.ButtonHover})
+        end)
+        
+        OptionButton.MouseLeave:Connect(function()
+            Tween(OptionButton, {BackgroundColor3 = Colors.Secondary})
+        end)
+    end
+    
+    local DropdownButton = Instance.new("TextButton")
+    DropdownButton.Size = UDim2.new(1, 0, 0, 40)
+    DropdownButton.BackgroundTransparency = 1
+    DropdownButton.Text = ""
+    DropdownButton.Parent = DropdownFrame
+    
+    DropdownButton.MouseButton1Click:Connect(function()
+        Open = not Open
+        
+        if Open then
+            local optionCount = #(config.Options or {})
+            local height = 40 + (optionCount * 35)
+            Tween(DropdownFrame, {Size = UDim2.new(1, -10, 0, height)})
+            Tween(Arrow, {Rotation = 180})
+        else
+            Tween(DropdownFrame, {Size = UDim2.new(1, -10, 0, 40)})
+            Tween(Arrow, {Rotation = 0})
+        end
+    end)
+    
+    DropdownLabel.Text = (config.Text or "Dropdown") .. ": " .. Selected
+    
+    return {
+        SetValue = function(value)
+            Selected = value
+            DropdownLabel.Text = (config.Text or "Dropdown") .. ": " .. Selected
+        end
+    }
+end
+
+-- Criar Parágrafo
+function BlackUI:CreateParagraph(tab, config)
+    local ParagraphFrame = CreateFrame(tab.Content, "Paragraph", UDim2.new(1, -10, 0, 0))
+    ParagraphFrame.BackgroundColor3 = Colors.Button
+    ParagraphFrame.AutomaticSize = Enum.AutomaticSize.Y
+    
+    if config.Title then
+        local TitleLabel = Instance.new("TextLabel")
+        TitleLabel.Position = UDim2.new(0, 10, 0, 8)
+        TitleLabel.Size = UDim2.new(1, -20, 0, 20)
+        TitleLabel.BackgroundTransparency = 1
+        TitleLabel.Text = config.Title
+        TitleLabel.TextColor3 = Colors.Text
+        TitleLabel.TextSize = 14
+        TitleLabel.Font = Enum.Font.GothamBold
+        TitleLabel.TextXAlignment = Enum.TextXAlignment.Left
+        TitleLabel.TextYAlignment = Enum.TextYAlignment.Top
+        TitleLabel.Parent = ParagraphFrame
+    end
+    
+    local ContentLabel = Instance.new("TextLabel")
+    ContentLabel.Position = UDim2.new(0, 10, 0, config.Title and 32 or 8)
+    ContentLabel.Size = UDim2.new(1, -20, 0, 0)
+    ContentLabel.BackgroundTransparency = 1
+    ContentLabel.Text = config.Content or ""
+    ContentLabel.TextColor3 = Colors.TextDim
+    ContentLabel.TextSize = 13
+    ContentLabel.Font = Enum.Font.Gotham
+    ContentLabel.TextXAlignment = Enum.TextXAlignment.Left
+    ContentLabel.TextYAlignment = Enum.TextYAlignment.Top
+    ContentLabel.TextWrapped = true
+    ContentLabel.AutomaticSize = Enum.AutomaticSize.Y
+    ContentLabel.Parent = ParagraphFrame
+    
+    local Padding = Instance.new("UIPadding")
+    Padding.PaddingBottom = UDim.new(0, 8)
+    Padding.Parent = ParagraphFrame
+    
+    return ParagraphFrame
+end
+
+-- Criar Divider
+function BlackUI:CreateDivider(tab)
+    local Divider = Instance.new("Frame")
+    Divider.Name = "Divider"
+    Divider.Size = UDim2.new(1, -10, 0, 1)
+    Divider.BackgroundColor3 = Colors.Border
+    Divider.BorderSizePixel = 0
+    Divider.Parent = tab.Content
+    
+    return Divider
+end
+
+-- Criar Label
+function BlackUI:CreateLabel(tab, text)
+    local Label = Instance.new("TextLabel")
+    Label.Name = "Label"
+    Label.Size = UDim2.new(1, -10, 0, 25)
+    Label.BackgroundTransparency = 1
+    Label.Text = text or "Label"
+    Label.TextColor3 = Colors.Text
+    Label.TextSize = 14
+    Label.Font = Enum.Font.Gotham
+    Label.TextXAlignment = Enum.TextXAlignment.Left
+    Label.Parent = tab.Content
+    
+    return Label
+end
+
+return BlackUI
