@@ -19,16 +19,16 @@ local Mouse = Player:GetMouse()
 
 -- Configurações de Cores
 local Colors = {
-    Background = Color3.fromRGB(10, 10, 10),
-    Secondary = Color3.fromRGB(20, 20, 20),
-    Border = Color3.fromRGB(40, 40, 40),
+    Background = Color3.fromRGB(0, 0, 0),
+    Secondary = Color3.fromRGB(0, 0, 0),
+    Border = Color3.fromRGB(255, 255, 255),
     Accent = Color3.fromRGB(255, 255, 255),
     Text = Color3.fromRGB(255, 255, 255),
-    TextDim = Color3.fromRGB(150, 150, 150),
-    Toggle = Color3.fromRGB(0, 200, 100),
-    Slider = Color3.fromRGB(200, 200, 200),
-    Button = Color3.fromRGB(30, 30, 30),
-    ButtonHover = Color3.fromRGB(40, 40, 40)
+    TextDim = Color3.fromRGB(180, 180, 180),
+    Toggle = Color3.fromRGB(255, 255, 255),
+    Slider = Color3.fromRGB(255, 255, 255),
+    Button = Color3.fromRGB(0, 0, 0),
+    ButtonHover = Color3.fromRGB(20, 20, 20)
 }
 
 -- Função de Tween
@@ -40,18 +40,51 @@ local function Tween(instance, properties, duration)
 end
 
 -- Função para criar ícones Lucide
+local LucideIcons = {
+    -- Interface & Navigation
+    ["home"] = "rbxassetid://10723434711",
+    ["menu"] = "rbxassetid://10723425537",
+    ["x"] = "rbxassetid://10747384394",
+    ["search"] = "rbxassetid://10734898355",
+    ["settings"] = "rbxassetid://10734950309",
+    ["cog"] = "rbxassetid://10734950309",
+    ["layout-dashboard"] = "rbxassetid://10723407389",
+    ["grid"] = "rbxassetid://10723407389",
+    
+    -- User & People
+    ["user"] = "rbxassetid://10734896829",
+    ["users"] = "rbxassetid://10747373176",
+    
+    -- Actions
+    ["plus"] = "rbxassetid://10747373176",
+    ["check"] = "rbxassetid://10709761530",
+    ["circle"] = "rbxassetid://10709761530",
+    
+    -- View
+    ["eye"] = "rbxassetid://10747372992",
+    ["eye-off"] = "rbxassetid://10747372992",
+    
+    -- Navigation
+    ["navigation"] = "rbxassetid://10723434711",
+    ["compass"] = "rbxassetid://10723434711",
+    ["map"] = "rbxassetid://10723434711",
+    
+    -- Others
+    ["shield"] = "rbxassetid://10723434711",
+    ["star"] = "rbxassetid://10734896829",
+    ["heart"] = "rbxassetid://10734896829",
+    ["flag"] = "rbxassetid://10723434711",
+}
+
 local function CreateIcon(parent, iconName, size)
     local icon = Instance.new("ImageLabel")
     icon.Name = "Icon"
     icon.Size = UDim2.new(0, size or 20, 0, size or 20)
     icon.BackgroundTransparency = 1
-    icon.Image = "rbxasset://textures/ui/GuiImagePlaceholder.png" -- Placeholder
+    icon.Image = LucideIcons[iconName] or iconName or "" -- Suporta tanto nomes quanto IDs diretos
     icon.ImageColor3 = Colors.Text
     icon.ScaleType = Enum.ScaleType.Fit
     icon.Parent = parent
-    
-    -- Aqui você pode adicionar URLs de ícones Lucide reais
-    -- Exemplo: icon.Image = "rbxassetid://ICON_ID"
     
     return icon
 end
@@ -102,8 +135,8 @@ function BlackUI:CreateWindow(config)
         self.ScreenGui.Parent = CoreGui
     end
     
-    -- Main Container
-    self.Main = CreateFrame(self.ScreenGui, "Main", UDim2.new(0, 600, 0, 450), UDim2.new(0.5, -300, 0.5, -225))
+    -- Main Container - Tamanho otimizado para mobile
+    self.Main = CreateFrame(self.ScreenGui, "Main", UDim2.new(0, 480, 0, 360), UDim2.new(0.5, -240, 0.5, -180))
     self.Main.BackgroundColor3 = Colors.Background
     
     -- Drag functionality
@@ -261,10 +294,12 @@ function BlackUI:CreateTab(config)
     Tab.Content.Size = UDim2.new(1, 0, 1, 0)
     Tab.Content.BackgroundTransparency = 1
     Tab.Content.BorderSizePixel = 0
-    Tab.Content.ScrollBarThickness = 4
+    Tab.Content.ScrollBarThickness = 6
     Tab.Content.ScrollBarImageColor3 = Colors.Border
     Tab.Content.CanvasSize = UDim2.new(0, 0, 0, 0)
     Tab.Content.Visible = false
+    Tab.Content.ClipsDescendants = true
+    Tab.Content.AutomaticCanvasSize = Enum.AutomaticSize.Y
     Tab.Content.Parent = self.ContentContainer
     
     local ContentList = Instance.new("UIListLayout")
@@ -276,13 +311,8 @@ function BlackUI:CreateTab(config)
     ContentPadding.PaddingTop = UDim.new(0, 10)
     ContentPadding.PaddingBottom = UDim.new(0, 10)
     ContentPadding.PaddingLeft = UDim.new(0, 10)
-    ContentPadding.PaddingRight = UDim.new(0, 10)
+    ContentPadding.PaddingRight = UDim.new(0, 16)
     ContentPadding.Parent = Tab.Content
-    
-    -- Auto-resize canvas
-    ContentList:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
-        Tab.Content.CanvasSize = UDim2.new(0, 0, 0, ContentList.AbsoluteContentSize.Y + 20)
-    end)
     
     -- Tab Click
     Tab.Button.MouseButton1Click:Connect(function()
@@ -747,6 +777,64 @@ function BlackUI:CreateLabel(tab, text)
     Label.Parent = tab.Content
     
     return Label
+end
+
+-- Criar Toggle UI (botão flutuante arredondado)
+function BlackUI:CreateUIToggle(config)
+    local UIToggle = Instance.new("TextButton")
+    UIToggle.Name = "UIToggle"
+    UIToggle.Size = UDim2.new(0, 50, 0, 50)
+    UIToggle.Position = config.Position or UDim2.new(0, 10, 0.5, -25)
+    UIToggle.BackgroundColor3 = Colors.Background
+    UIToggle.BorderSizePixel = 0
+    UIToggle.Text = ""
+    UIToggle.ZIndex = 1000
+    UIToggle.Parent = self.ScreenGui
+    
+    -- Cantos arredondados
+    local Corner = Instance.new("UICorner")
+    Corner.CornerRadius = UDim.new(1, 0)
+    Corner.Parent = UIToggle
+    
+    -- Borda branca
+    local Border = Instance.new("UIStroke")
+    Border.Color = Colors.Border
+    Border.Thickness = 2
+    Border.Parent = UIToggle
+    
+    -- Ícone
+    if config.Icon then
+        local Icon = CreateIcon(UIToggle, config.Icon, 30)
+        Icon.Position = UDim2.new(0.5, -15, 0.5, -15)
+    end
+    
+    -- Funcionalidade
+    local Visible = true
+    UIToggle.MouseButton1Click:Connect(function()
+        Visible = not Visible
+        self.Main.Visible = Visible
+        
+        -- Animação do botão
+        local targetSize = Visible and UDim2.new(0, 50, 0, 50) or UDim2.new(0, 45, 0, 45)
+        Tween(UIToggle, {Size = targetSize})
+        
+        if config.Callback then
+            config.Callback(Visible)
+        end
+    end)
+    
+    -- Efeito hover
+    UIToggle.MouseEnter:Connect(function()
+        Tween(UIToggle, {Size = UDim2.new(0, 55, 0, 55)})
+        Tween(Border, {Thickness = 3})
+    end)
+    
+    UIToggle.MouseLeave:Connect(function()
+        Tween(UIToggle, {Size = UDim2.new(0, 50, 0, 50)})
+        Tween(Border, {Thickness = 2})
+    end)
+    
+    return UIToggle
 end
 
 return BlackUI
