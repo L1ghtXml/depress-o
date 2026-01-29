@@ -5,13 +5,13 @@ Uma biblioteca moderna e completa de UI em Lua com tema **all black**, desenvolv
 ##  Características
 
 -  **Tema All Black** - Design moderno e elegante
-- 📱 **Suporte Mobile** - Funciona perfeitamente em dispositivos móveis
-- 🔲 **Cantos Quadrados** - Estilo clean e profissional
-- 🎯 **Componentes Completos** - Todos os elementos que você precisa
-- 🖱️ **Drag & Drop** - Interface arrastável
-- 🎮 **Otimizado** - Performance excelente
+-  **Suporte Mobile** - Funciona perfeitamente em dispositivos móveis
+-  **Cantos Quadrados** - Estilo clean e profissional
+-  **Componentes Completos** - Todos os elementos que você precisa
+-  **Drag & Drop** - Interface arrastável
+-  **Otimizado** - Performance excelente
 
-## 📦 Componentes Disponíveis
+##  Componentes Disponíveis
 
 ### Window (Janela Principal)
 - Título customizável
@@ -159,7 +159,7 @@ Window:CreateLabel(Tab, "Este é um texto simples")
 Window:CreateDivider(Tab)
 ```
 
-## 🎨 Exemplo Completo
+##  Exemplo Completo
 
 ```lua
 -- Carregar biblioteca
@@ -231,7 +231,7 @@ Window:CreateDropdown(MainTab, {
 })
 ```
 
-## 🎯 Funcionalidades Especiais
+##  Funcionalidades Especiais
 
 ### Slider com Input Manual
 O slider possui um input no topo que permite digitar o valor diretamente, perfeito para quando o slider não funciona bem em mobile ou quando você precisa de precisão.
@@ -245,7 +245,7 @@ A janela pode ser arrastada clicando e segurando em qualquer parte dela.
 ### Proteção Anti-Detecção
 A UI automaticamente tenta se proteger usando `gethui()` ou `syn.protect_gui()` se disponível.
 
-## 🎨 Customização de Cores
+##  Customização de Cores
 
 Você pode modificar as cores da UI editando a tabela `Colors` no início do código:
 
@@ -264,7 +264,7 @@ local Colors = {
 }
 ```
 
-## 🔧 Ícones Lucide
+##  Ícones Lucide
 
 Para usar ícones Lucide, você pode:
 1. Usar placeholders (padrão)
@@ -280,7 +280,7 @@ Exemplo de ícones disponíveis:
 - `navigation`
 - `cog`
 
-## 📱 Compatibilidade
+##  Compatibilidade
 
 - ✅ Synapse X
 - ✅ Script-Ware
@@ -289,18 +289,18 @@ Exemplo de ícones disponíveis:
 - ✅ Outros executores modernos
 - ✅ Mobile (iOS/Android)
 
-## ⚠️ Notas Importantes
+##  Notas Importantes
 
 1. **Performance**: A UI é otimizada, mas muitos elementos podem causar lag em dispositivos fracos
 2. **Detecção**: Use com cautela, nenhuma UI é 100% indetectável
 3. **Atualizações**: Sempre use a versão mais recente
 4. **Suporte**: Reporte bugs e sugestões
 
-## 📝 Licença
+##  Licença
 
 Este projeto é de código aberto. Você pode usar, modificar e distribuir livremente.
 
-## 🤝 Contribuindo
+##  Contribuindo
 
 Contribuições são bem-vindas! Sinta-se livre para:
 - Reportar bugs
@@ -308,7 +308,7 @@ Contribuições são bem-vindas! Sinta-se livre para:
 - Melhorar o código
 - Criar temas customizados
 
-## 📞 Suporte
+##  Suporte
 
 Se precisar de ajuda:
 1. Leia a documentação completa
